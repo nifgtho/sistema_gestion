@@ -1,0 +1,119 @@
+<div class="card">
+    <h2><i class="fas fa-user-shield"></i> Gestión de Tipos de Agente</h2>
+    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
+        Define las categorías de personal o entidades que intervienen como agentes en los registros de supervisión.
+    </p>
+    
+    <form id="formTipoAgente">
+        <input type="hidden" id="ID_TA"> 
+
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Nombre del Tipo de Agente <span style="color: var(--status-error);">*</span></label>
+                <input type="text" id="NOMBRE_TA" class="form-control" placeholder="Ej: Supervisor, Inspector, Técnico, etc." required>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn btn-primary" id="btnGuardarAgente">
+                <i class="fas fa-save"></i> Guardar Agente
+            </button>
+            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormAgente()">
+                <i class="fas fa-eraser"></i> Limpiar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-users-cog"></i> Agentes Registrados</h2>
+    
+    <div id="contenedorTablaAgente">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Conectando con el catálogo de recursos...
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Inicialización llamada por el Router (sidebar.js)
+     */
+    async function inicializarModulo(vistaID) {
+        // Nota: Asegúrate de que en sidebar.js el ID 'tipo_agente' apunte a este archivo
+        cargarTablaAgentes();
+
+        const form = document.getElementById('formTipoAgente');
+        
+        // Limpieza de eventos para navegación SPA
+        const nuevoForm = form.cloneNode(true);
+        form.parentNode.replaceChild(nuevoForm, form);
+
+        nuevoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validador profesional
+            const datos = FormManager.validateAndGetData('formTipoAgente');
+            
+            if (datos) {
+                const idEdicion = document.getElementById('ID_TA').value;
+                const metodo = idEdicion ? 'PUT' : 'POST';
+                // La ruta base en nuestro controlador es /api/recurso/agente
+                const endpoint = idEdicion ? `/recurso/agente/${idEdicion}` : '/recurso/agente';
+
+                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+                
+                if (respuesta) {
+                    App.mostrarAlerta(idEdicion ? 'Tipo de Agente actualizado' : 'Tipo de Agente registrado con éxito');
+                    limpiarFormAgente();
+                    cargarTablaAgentes(); 
+                }
+            }
+        });
+    }
+
+    /**
+     * Carga y renderizado de la tabla usando nuestra clase DataTable
+     */
+    async function cargarTablaAgentes() {
+        const datos = await App.peticionAPI('/recurso/agente'); 
+        
+        if (datos) {
+            const tabla = new DataTable({
+                containerId: 'contenedorTablaAgente',
+                data: datos,
+                columns: [
+                    { key: 'ID_TA', label: 'ID' },
+                    { key: 'NOMBRE_TA', label: 'Descripción del Agente' }
+                ],
+                actions: {
+                    idKey: 'ID_TA',
+                    edit: (registro) => {
+                        FormManager.fillForm('formTipoAgente', registro);
+                        document.getElementById('btnGuardarAgente').innerHTML = '<i class="fas fa-sync"></i> Actualizar Agente';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    },
+                    delete: async (id) => {
+                        if (confirm('¿Deseas eliminar este tipo de agente?')) {
+                            const res = await App.peticionAPI(`/recurso/agente/${id}`, 'DELETE');
+                            if (res) {
+                                App.mostrarAlerta('Agente eliminado');
+                                cargarTablaAgentes();
+                            }
+                        }
+                    }
+                }
+            });
+            tabla.render();
+        }
+    }
+
+    /**
+     * Resetea el formulario al estado inicial
+     */
+    function limpiarFormAgente() {
+        FormManager.resetForm('formTipoAgente');
+        document.getElementById('ID_TA').value = '';
+        document.getElementById('btnGuardarAgente').innerHTML = '<i class="fas fa-save"></i> Guardar Agente';
+    }
+</script>

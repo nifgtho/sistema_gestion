@@ -1,0 +1,146 @@
+<div class="card">
+    <h2><i class="fas fa-tasks"></i> Gestión de Acciones Operativas</h2>
+    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
+        Registra, edita o elimina las acciones principales que se utilizarán en las supervisiones.
+    </p>
+    
+    <form id="formAccion">
+        <input type="hidden" id="ID_ACCION"> 
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Nombre Abreviado <span style="color: var(--status-error);">*</span></label>
+                <input type="text" id="NOMBRE_ABREVIADO" class="form-control" placeholder="Ej: MANT" required>
+            </div>
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Nombre de la Acción <span style="color: var(--status-error);">*</span></label>
+                <input type="text" id="NOMBRE_ACCION" class="form-control" placeholder="Ej: Mantenimiento Preventivo" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Código A.E. (Opcional)</label>
+                <input type="text" id="CODIGO_A_E" class="form-control" placeholder="Ej: AE-01">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Código P. Acción (Opcional)</label>
+                <input type="text" id="CODIGO_P_ACCION" class="form-control" placeholder="Ej: PA-01">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn btn-primary" id="btnGuardarAccion">
+                <i class="fas fa-save"></i> Guardar Acción
+            </button>
+            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormularioAccion()">
+                <i class="fas fa-times-circle"></i> Cancelar / Limpiar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-list"></i> Catálogo de Acciones Registradas</h2>
+    
+    <div id="contenedorTablaAccion">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Cargando tabla...
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Función principal. Es llamada por sidebar.js cuando el usuario hace clic en el menú.
+     */
+    async function inicializarModulo(vistaID) {
+        if (vistaID !== 'accion') return;
+
+        // 1. Cargamos la tabla apenas se abre la ventana
+        cargarTablaAcciones();
+
+        // 2. Configuramos el evento de guardar el formulario
+        const form = document.getElementById('formAccion');
+        
+        // Removemos eventos previos para evitar que se guarde doble si entramos y salimos de la vista
+        const nuevoForm = form.cloneNode(true);
+        form.parentNode.replaceChild(nuevoForm, form);
+
+        nuevoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Usamos nuestro validador: Extrae los datos y pinta de rojo si algo falta
+            const datos = FormManager.validateAndGetData('formAccion');
+            
+            if (datos) {
+                const idEdicion = document.getElementById('ID_ACCION').value;
+                const metodo = idEdicion ? 'PUT' : 'POST';
+                const endpoint = idEdicion ? `/accion/${idEdicion}` : '/accion';
+
+                // Enviamos los datos a Node.js
+                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+                
+                if (respuesta) {
+                    App.mostrarAlerta(idEdicion ? 'Acción actualizada correctamente' : 'Acción registrada con éxito');
+                    limpiarFormularioAccion();
+                    cargarTablaAcciones(); // Refrescamos la tabla para ver el nuevo dato
+                }
+            }
+        });
+    }
+
+    /**
+     * Consulta al Backend y dibuja la tabla con opciones de Editar y Eliminar
+     */
+    async function cargarTablaAcciones() {
+        const datos = await App.peticionAPI('/accion'); 
+        
+        if (datos) {
+            const tabla = new DataTable({
+                containerId: 'contenedorTablaAccion',
+                data: datos,
+                columns: [
+                    { key: 'ID_ACCION', label: 'ID' },
+                    { key: 'NOMBRE_ABREVIADO', label: 'Abrev.' },
+                    { key: 'NOMBRE_ACCION', label: 'Nombre de la Acción' },
+                    { key: 'CODIGO_A_E', label: 'Cód. AE' }
+                ],
+                actions: {
+                    idKey: 'ID_ACCION',
+                    // Lógica cuando presionan el botón amarillo (Editar)
+                    edit: (registro) => {
+                        FormManager.fillForm('formAccion', registro);
+                        
+                        // Cambiamos el texto del botón para que el usuario sepa que está editando
+                        document.getElementById('btnGuardarAccion').innerHTML = '<i class="fas fa-sync"></i> Actualizar Acción';
+                        
+                        // Hacemos scroll suave hacia arriba
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        App.mostrarAlerta('Modifica los datos y presiona Actualizar', 'info');
+                    },
+                    // Lógica cuando presionan el botón rojo (Eliminar)
+                    delete: async (id) => {
+                        if (confirm('⚠️ ¿Estás seguro de eliminar esta acción de forma permanente?')) {
+                            const res = await App.peticionAPI(`/accion/${id}`, 'DELETE');
+                            if (res) {
+                                App.mostrarAlerta('Acción eliminada exitosamente');
+                                cargarTablaAcciones();
+                            }
+                        }
+                    }
+                }
+            });
+            tabla.render();
+        }
+    }
+
+    /**
+     * Limpia el formulario y resetea el botón a su estado original
+     */
+    function limpiarFormularioAccion() {
+        FormManager.resetForm('formAccion');
+        document.getElementById('ID_ACCION').value = '';
+        document.getElementById('btnGuardarAccion').innerHTML = '<i class="fas fa-save"></i> Guardar Acción';
+    }
+</script>

@@ -1,0 +1,124 @@
+<div class="card">
+    <h2><i class="fas fa-layer-group"></i> Gestión de Subacciones</h2>
+    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
+        Administra el tercer nivel de detalle operativo (Subacciones) para afinar los registros de supervisión.
+    </p>
+    
+    <form id="formSubaccion">
+        <input type="hidden" id="ID_SA"> 
+
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Descripción de la Subacción <span style="color: var(--status-error);">*</span></label>
+                <input type="text" id="SUB_ACCION_ESP" class="form-control" placeholder="Ej: Calibración de sensores de temperatura" required>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn btn-primary" id="btnGuardarSubaccion">
+                <i class="fas fa-save"></i> Guardar Subacción
+            </button>
+            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormularioSA()">
+                <i class="fas fa-times-circle"></i> Cancelar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-list-alt"></i> Listado de Subacciones</h2>
+    
+    <div id="contenedorTablaSubaccion">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Cargando tabla...
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Inicialización del módulo al ser cargado por el Router (sidebar.js)
+     */
+    async function inicializarModulo(vistaID) {
+        if (vistaID !== 'subaccion') return;
+
+        // Cargar los datos existentes
+        cargarTablaSubaccion();
+
+        // Configurar el formulario
+        const form = document.getElementById('formSubaccion');
+        
+        // Limpiamos listeners previos (Prevención de bugs en SPA)
+        const nuevoForm = form.cloneNode(true);
+        form.parentNode.replaceChild(nuevoForm, form);
+
+        nuevoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validación automática e inteligente
+            const datos = FormManager.validateAndGetData('formSubaccion');
+            
+            if (datos) {
+                const idEdicion = document.getElementById('ID_SA').value;
+                const metodo = idEdicion ? 'PUT' : 'POST';
+                // Asumimos que la ruta en el backend será /api/subaccion
+                const endpoint = idEdicion ? `/subaccion/${idEdicion}` : '/subaccion';
+
+                // Envío de la petición al servidor
+                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+                
+                if (respuesta) {
+                    App.mostrarAlerta(idEdicion ? 'Subacción actualizada correctamente' : 'Subacción creada con éxito');
+                    limpiarFormularioSA();
+                    cargarTablaSubaccion(); // Refrescar la vista
+                }
+            }
+        });
+    }
+
+    /**
+     * Consume la API y renderiza la DataTable profesional
+     */
+    async function cargarTablaSubaccion() {
+        const datos = await App.peticionAPI('/subaccion'); 
+        
+        if (datos) {
+            const tabla = new DataTable({
+                containerId: 'contenedorTablaSubaccion',
+                data: datos,
+                columns: [
+                    { key: 'ID_SA', label: 'ID' },
+                    { key: 'SUB_ACCION_ESP', label: 'Descripción de la Subacción' }
+                ],
+                actions: {
+                    idKey: 'ID_SA',
+                    edit: (registro) => {
+                        FormManager.fillForm('formSubaccion', registro);
+                        document.getElementById('btnGuardarSubaccion').innerHTML = '<i class="fas fa-sync"></i> Actualizar Subacción';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        App.mostrarAlerta('Modifica el texto y presiona Actualizar', 'info');
+                    },
+                    delete: async (id) => {
+                        if (confirm('⚠️ ¿Estás seguro de eliminar esta Subacción permanentemente?')) {
+                            const res = await App.peticionAPI(`/subaccion/${id}`, 'DELETE');
+                            if (res) {
+                                App.mostrarAlerta('Subacción eliminada exitosamente');
+                                cargarTablaSubaccion();
+                            }
+                        }
+                    }
+                }
+            });
+            tabla.render();
+        }
+    }
+
+    /**
+     * Resetea el formulario y los estados visuales
+     */
+    function limpiarFormularioSA() {
+        FormManager.resetForm('formSubaccion');
+        document.getElementById('ID_SA').value = '';
+        document.getElementById('btnGuardarSubaccion').innerHTML = '<i class="fas fa-save"></i> Guardar Subacción';
+    }
+</script>

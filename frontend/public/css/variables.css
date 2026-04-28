@@ -1,0 +1,63 @@
+/* ==========================================================================
+   VARIABLES GLOBALES DEL SISTEMA (Design Tokens)
+   ========================================================================== */
+:root {
+    /* 1. PALETA DE COLORES PRINCIPAL */
+    --color-primary: #0056b3;       /* Azul principal (Botones, enlaces activos) */
+    --color-primary-hover: #004494; /* Azul oscuro (Efecto hover de botones) */
+    --color-secondary: #6c757d;     /* Gris secundario (Textos menores, bordes) */
+
+    /* 2. COLORES DE FONDO (Estructura de la interfaz) */
+    --bg-main: #f4f7f6;             /* Fondo gris muy claro para el cuerpo de la página */
+    --bg-card: #ffffff;             /* Fondo blanco limpio para los formularios y tablas */
+    --bg-sidebar: #1a252f;          /* Fondo oscuro elegante para el menú lateral */
+    --bg-sidebar-hover: #2c3e50;    /* Fondo iluminado al pasar el cursor en el menú */
+
+    /* 3. COLORES DE TEXTO */
+    --text-dark: #333333;           /* Texto principal, casi negro para excelente lectura */
+    --text-muted: #888888;          /* Texto secundario (placeholders, notas pequeñas) */
+    --text-light: #ffffff;          /* Texto blanco (sobre botones azules o menú oscuro) */
+
+    /* 4. COLORES DE ESTADO Y ALERTAS (Feedback al usuario) */
+    --status-success: #28a745;      /* Verde para "Registro guardado" */
+    --status-error: #dc3545;        /* Rojo para "Error al eliminar" o campos vacíos */
+    --status-warning: #ffc107;      /* Amarillo para advertencias */
+    --status-info: #17a2b8;         /* Celeste para mensajes informativos */
+
+    /* 5. TIPOGRAFÍA (Fuentes modernas y limpias) */
+    --font-family-base: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-size-base: 15px;         /* Tamaño de texto estándar para lectura cómoda */
+    --font-size-sm: 13px;           /* Para etiquetas o textos secundarios */
+    --font-size-h2: 24px;           /* Para los títulos de los módulos */
+
+    /* 6. ESPACIADOS Y BORDES (Mantienen la proporción geométrica) */
+    --border-radius-sm: 4px;        /* Redondeo ligero para inputs y botones */
+    --border-radius-md: 8px;        /* Redondeo para tarjetas (cards) y modales */
+    --spacing-sm: 10px;             /* Espacio pequeño (entre labels e inputs) */
+    --spacing-md: 20px;             /* Espacio mediano (padding interno de tarjetas) */
+    --spacing-lg: 30px;             /* Espacio grande (márgenes entre secciones) */
+
+    /* 7. SOMBRAS Y TRANSICIONES (Profundidad y fluidez) */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);  /* Sombra sutil para inputs enfocados */
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);  /* Sombra base para las tarjetas blancas */
+    --transition-base: all 0.3s ease-in-out;     /* Transición global para botones y hovers */
+}
+
+/* ==========================================================================
+   RESETEO GLOBAL BÁSICO
+   Esto estandariza el comportamiento en Google Chrome, Firefox, Edge, etc.
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Fundamental: el padding no aumenta el tamaño de las cajas */
+}
+
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    color: var(--text-dark);
+    background-color: var(--bg-main);
+    -webkit-font-smoothing: antialiased; /* Renderizado de fuentes más nítido en pantallas modernas */
+    -moz-osx-font-smoothing: grayscale;
+}

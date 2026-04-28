@@ -1,0 +1,119 @@
+<div class="card">
+    <h2><i class="fas fa-car"></i> Gestión de Medios de Transporte</h2>
+    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
+        Administra los tipos de movilidad utilizados por los agentes para las actividades de supervisión.
+    </p>
+    
+    <form id="formTransporte">
+        <input type="hidden" id="id_tt"> 
+
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Descripción del Transporte <span style="color: var(--status-error);">*</span></label>
+                <input type="text" id="NOMBRE_TRANSPORTE" class="form-control" placeholder="Ej: Camioneta 4x4, Motocicleta, Furgoneta, etc." required>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn btn-primary" id="btnGuardarTransporte">
+                <i class="fas fa-save"></i> Guardar Transporte
+            </button>
+            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormTransporte()">
+                <i class="fas fa-brush"></i> Limpiar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-bus-alt"></i> Transportes Registrados</h2>
+    
+    <div id="contenedorTablaTransporte">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <i class="fas fa-sync fa-spin"></i> Cargando catálogo de movilidad...
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Inicialización llamada por el Router
+     */
+    async function inicializarModulo(vistaID) {
+        // Nota: Asegúrate de que en sidebar.js el ID 'tipo_transporte' apunte a este archivo
+        cargarTablaTransportes();
+
+        const form = document.getElementById('formTransporte');
+        
+        // Limpieza de eventos para navegación SPA profesional
+        const nuevoForm = form.cloneNode(true);
+        form.parentNode.replaceChild(nuevoForm, form);
+
+        nuevoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Usamos nuestra clase FormManager para validar
+            const datos = FormManager.validateAndGetData('formTransporte');
+            
+            if (datos) {
+                const idEdicion = document.getElementById('id_tt').value;
+                const metodo = idEdicion ? 'PUT' : 'POST';
+                // La ruta base en nuestro controlador es /api/recurso/transporte
+                const endpoint = idEdicion ? `/recurso/transporte/${idEdicion}` : '/recurso/transporte';
+
+                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+                
+                if (respuesta) {
+                    App.mostrarAlerta(idEdicion ? 'Transporte actualizado' : 'Transporte registrado con éxito');
+                    limpiarFormTransporte();
+                    cargarTablaTransportes(); 
+                }
+            }
+        });
+    }
+
+    /**
+     * Carga y renderizado de la tabla
+     */
+    async function cargarTablaTransportes() {
+        const datos = await App.peticionAPI('/recurso/transporte'); 
+        
+        if (datos) {
+            const tabla = new DataTable({
+                containerId: 'contenedorTablaTransporte',
+                data: datos,
+                columns: [
+                    { key: 'id_tt', label: 'ID' },
+                    { key: 'NOMBRE_TRANSPORTE', label: 'Medio de Transporte' }
+                ],
+                actions: {
+                    idKey: 'id_tt',
+                    edit: (registro) => {
+                        FormManager.fillForm('formTransporte', registro);
+                        document.getElementById('btnGuardarTransporte').innerHTML = '<i class="fas fa-sync"></i> Actualizar Transporte';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    },
+                    delete: async (id) => {
+                        if (confirm('¿Estás seguro de eliminar este transporte?')) {
+                            const res = await App.peticionAPI(`/recurso/transporte/${id}`, 'DELETE');
+                            if (res) {
+                                App.mostrarAlerta('Transporte eliminado');
+                                cargarTablaTransportes();
+                            }
+                        }
+                    }
+                }
+            });
+            tabla.render();
+        }
+    }
+
+    /**
+     * Resetea el formulario al estado original
+     */
+    function limpiarFormTransporte() {
+        FormManager.resetForm('formTransporte');
+        document.getElementById('id_tt').value = '';
+        document.getElementById('btnGuardarTransporte').innerHTML = '<i class="fas fa-save"></i> Guardar Transporte';
+    }
+</script>

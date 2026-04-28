@@ -1,0 +1,215 @@
+<div class="card">
+    <h2><i class="fas fa-file-signature"></i> Nuevo Registro de Supervisión</h2>
+    
+    <form id="formDetalleRegistro">
+        <input type="hidden" id="ID_REGISTRO">
+
+        <h3 style="font-size: 1rem; color: var(--color-secondary); margin: 15px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">1. Clasificación de la Operación</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Acción Principal *</label>
+                <select id="ID_ACCION" class="form-control" required>
+                    <option value="">Cargando acciones...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Acción Específica</label>
+                <select id="ID_AE" class="form-control">
+                    <option value="">Seleccione...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Sub Acción</label>
+                <select id="ID_SA" class="form-control">
+                    <option value="">Seleccione...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Actividad *</label>
+                <select id="ID_ACTIVIDAD" class="form-control" required>
+                    <option value="">Cargando actividades...</option>
+                </select>
+            </div>
+        </div>
+
+        <h3 style="font-size: 1rem; color: var(--color-secondary); margin: 20px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">2. Entorno y Recursos</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Provincia *</label>
+                <select id="id_zp" class="form-control" required>
+                    <option value="">Cargando provincias...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Distrito *</label>
+                <select id="id_zd" class="form-control" required>
+                    <option value="">Cargando distritos...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipo de Agente</label>
+                <select id="ID_TA" class="form-control">
+                    <option value="">Seleccione agente...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Medio de Transporte</label>
+                <select id="id_tt" class="form-control">
+                    <option value="">Seleccione transporte...</option>
+                </select>
+            </div>
+        </div>
+
+        <h3 style="font-size: 1rem; color: var(--color-secondary); margin: 20px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">3. Documentación y Resultados</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Empresa Supervisora *</label>
+                <input type="text" id="EMPRESA_SUPERVISORA" class="form-control" placeholder="Nombre de la empresa" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nro. Expediente</label>
+                <input type="text" id="NRO_EXPEDIENTE" class="form-control" placeholder="Ej: EXP-2026-001">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Contrato</label>
+                <input type="text" id="CONTRATO" class="form-control" placeholder="Nro. de contrato">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Carta Línea</label>
+                <input type="text" id="CARTA_LINEA" class="form-control" placeholder="Referencia carta línea">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Nro. Supervisores Asignados</label>
+                <input type="number" id="NUM_SUPERVISORES" class="form-control" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Calidad Entregable</label>
+                <input type="text" id="CALIDAD_ENTREGABLE" class="form-control" placeholder="Ej: Conforme, Observado">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+            <label class="form-label">Observaciones Adicionales</label>
+            <textarea id="OBSERVACIONES" class="form-control" rows="3" placeholder="Detalles relevantes de la supervisión..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Guardar Registro Maestro
+            </button>
+            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="FormManager.resetForm('formDetalleRegistro'); document.getElementById('ID_REGISTRO').value = '';">
+                <i class="fas fa-eraser"></i> Limpiar Formulario
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-table"></i> Historial de Supervisiones</h2>
+    <div id="contenedorTablaRegistro"></div>
+</div>
+
+<script>
+    async function inicializarModulo(vistaID) {
+        if (vistaID !== 'detalle_registro') return;
+
+        // 1. Cargar las listas desplegables (Catálogos) y la tabla de datos
+        await cargarCatalogosSelect();
+        cargarTablaRegistros();
+
+        // 2. Lógica para Guardar o Actualizar
+        const form = document.getElementById('formDetalleRegistro');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Extraemos toda la data empaquetada. Los campos vacíos opcionales se enviarán como ''
+            const datos = FormManager.validateAndGetData('formDetalleRegistro');
+            
+            if (datos) {
+                const idEdicion = document.getElementById('ID_REGISTRO').value;
+                const metodo = idEdicion ? 'PUT' : 'POST';
+                const endpoint = idEdicion ? `/detalle_registro/${idEdicion}` : '/detalle_registro';
+
+                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+                
+                if (respuesta) {
+                    App.mostrarAlerta(idEdicion ? 'Registro actualizado' : 'Registro maestro creado con éxito');
+                    FormManager.resetForm('formDetalleRegistro');
+                    document.getElementById('ID_REGISTRO').value = '';
+                    cargarTablaRegistros(); 
+                }
+            }
+        });
+    }
+
+    /**
+     * Trae todos los catálogos del servidor en 1 sola petición para no saturar la red
+     */
+    async function cargarCatalogosSelect() {
+        const datos = await App.peticionAPI('/detalle_registro/datos-formulario');
+        
+        if (datos) {
+            // Usamos una función auxiliar para llenar cada <select> rápidamente
+            llenarSelect('ID_ACCION', datos.acciones, 'ID_ACCION', 'NOMBRE_ACCION', 'Seleccione Acción...');
+            llenarSelect('ID_AE', datos.accionesEspec, 'ID_AE', 'ACCION_ESPECIFICA', 'Seleccione A.E...');
+            llenarSelect('ID_SA', datos.subacciones, 'ID_SA', 'SUB_ACCION_ESP', 'Seleccione Sub Acción...');
+            llenarSelect('ID_ACTIVIDAD', datos.actividades, 'ID_ACTIVIDAD', 'NOMBRE_ACTIVIDAD', 'Seleccione Actividad...');
+            llenarSelect('id_zp', datos.provincias, 'id_zp', 'NOMBRE_PROVINCIA', 'Seleccione Provincia...');
+            llenarSelect('id_zd', datos.distritos, 'id_zd', 'NOMBRE_DISTRITO', 'Seleccione Distrito...');
+            llenarSelect('ID_TA', datos.tiposAgente, 'ID_TA', 'NOMBRE_TA', 'Seleccione Agente...');
+            llenarSelect('id_tt', datos.tiposTransporte, 'id_tt', 'NOMBRE_TRANSPORTE', 'Seleccione Transporte...');
+        }
+    }
+
+    /**
+     * Función utilitaria para construir los <option> de HTML
+     */
+    function llenarSelect(elementId, arrayDatos, keyId, keyTexto, textoDefault) {
+        const select = document.getElementById(elementId);
+        if (!select) return;
+
+        let html = `<option value="">-- ${textoDefault} --</option>`;
+        arrayDatos.forEach(item => {
+            html += `<option value="${item[keyId]}">${item[keyTexto]}</option>`;
+        });
+        select.innerHTML = html;
+    }
+
+    /**
+     * Carga el historial en nuestra DataTable profesional
+     */
+    async function cargarTablaRegistros() {
+        const datos = await App.peticionAPI('/detalle_registro');
+        
+        if (datos) {
+            const tabla = new DataTable({
+                containerId: 'contenedorTablaRegistro',
+                data: datos,
+                columns: [
+                    { key: 'ID_REGISTRO', label: 'ID' },
+                    { key: 'NRO_EXPEDIENTE', label: 'Expediente' },
+                    { key: 'EMPRESA_SUPERVISORA', label: 'Empresa' },
+                    // Usamos el 'LEFT JOIN' que hicimos en el backend para mostrar texto y no números
+                    { key: 'NOMBRE_ACCION', label: 'Acción' }, 
+                    { key: 'AGENTE', label: 'Agente Asignado' }
+                ],
+                actions: {
+                    idKey: 'ID_REGISTRO',
+                    delete: async (id) => {
+                        if (confirm('Alerta Crítica: ¿Estás seguro de eliminar este Registro Maestro de Supervisión de forma permanente?')) {
+                            const res = await App.peticionAPI(`/detalle_registro/${id}`, 'DELETE');
+                            if (res) {
+                                App.mostrarAlerta('Registro eliminado permanentemente.');
+                                cargarTablaRegistros();
+                            }
+                        }
+                    }
+                }
+            });
+            tabla.render();
+        }
+    }
+</script>

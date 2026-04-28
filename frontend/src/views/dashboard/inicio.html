@@ -1,0 +1,151 @@
+<div class="card" style="margin-bottom: var(--spacing-lg);">
+    <h2 style="font-size: var(--font-size-h2); color: var(--color-primary); border-bottom: none; margin-bottom: 5px;">
+        Bienvenido al Sistema SAE, Pedro
+    </h2>
+    <p style="color: var(--text-muted); font-size: var(--font-size-base);">
+        Panel de control principal. Aquí tienes un resumen en tiempo real del estado de tu base de datos.
+    </p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
+    
+    <div class="card" style="border-left: 4px solid var(--color-primary); margin-bottom: 0; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="color: var(--text-muted); font-size: var(--font-size-sm); text-transform: uppercase; margin-bottom: 5px;">Total Registros</h3>
+                <span style="font-size: 2.2rem; font-weight: bold; color: var(--text-dark);" id="metric-registros">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 1.2rem; color: #ccc;"></i>
+                </span>
+            </div>
+            <div style="background: rgba(0, 86, 179, 0.1); padding: 15px; border-radius: 50%; color: var(--color-primary);">
+                <i class="fas fa-file-contract fa-2x"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--status-success); margin-bottom: 0; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="color: var(--text-muted); font-size: var(--font-size-sm); text-transform: uppercase; margin-bottom: 5px;">Acciones</h3>
+                <span style="font-size: 2.2rem; font-weight: bold; color: var(--text-dark);" id="metric-acciones">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 1.2rem; color: #ccc;"></i>
+                </span>
+            </div>
+            <div style="background: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 50%; color: var(--status-success);">
+                <i class="fas fa-tasks fa-2x"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--status-warning); margin-bottom: 0; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="color: var(--text-muted); font-size: var(--font-size-sm); text-transform: uppercase; margin-bottom: 5px;">Agentes</h3>
+                <span style="font-size: 2.2rem; font-weight: bold; color: var(--text-dark);" id="metric-agentes">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 1.2rem; color: #ccc;"></i>
+                </span>
+            </div>
+            <div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 50%; color: var(--status-warning);">
+                <i class="fas fa-user-tie fa-2x"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--status-info); margin-bottom: 0; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="color: var(--text-muted); font-size: var(--font-size-sm); text-transform: uppercase; margin-bottom: 5px;">Provincias</h3>
+                <span style="font-size: 2.2rem; font-weight: bold; color: var(--text-dark);" id="metric-zonas">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 1.2rem; color: #ccc;"></i>
+                </span>
+            </div>
+            <div style="background: rgba(23, 162, 184, 0.1); padding: 15px; border-radius: 50%; color: var(--status-info);">
+                <i class="fas fa-map-marked-alt fa-2x"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-bolt" style="color: var(--status-warning);"></i> Accesos Rápidos</h2>
+    <p style="color: var(--text-muted); margin-bottom: 15px; font-size: var(--font-size-sm);">Navega rápidamente a los módulos más utilizados del sistema.</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-sm);">
+        <button class="btn btn-primary" onclick="cargarVista('detalle_registro')" style="justify-content: flex-start; padding: 15px; font-size: 1.05rem;">
+            <i class="fas fa-plus-circle"></i> Nuevo Registro SAE
+        </button>
+        
+        <button class="btn" onclick="cargarVista('accion')" style="background-color: var(--bg-sidebar); color: white; justify-content: flex-start; padding: 15px; font-size: 1.05rem;">
+            <i class="fas fa-tasks"></i> Catálogo Acciones
+        </button>
+
+        <button class="btn" onclick="cargarVista('zona')" style="background-color: var(--bg-sidebar); color: white; justify-content: flex-start; padding: 15px; font-size: 1.05rem;">
+            <i class="fas fa-map"></i> Gestionar Zonas
+        </button>
+    </div>
+</div>
+
+<script>
+    /**
+     * Lógica exclusiva de la vista Dashboard.
+     * El archivo 'sidebar.js' llamará automáticamente a esta función al inyectar el HTML.
+     */
+    async function inicializarModulo(vistaID) {
+        if (vistaID !== 'dashboard') return;
+
+        try {
+            // 1. Usamos Promise.all para hacer peticiones en paralelo a tu backend.
+            // Esto hace que el Dashboard cargue instantáneamente.
+            const [registros, acciones, agentes, zonas] = await Promise.all([
+                App.peticionAPI('/detalle_registro'),
+                App.peticionAPI('/accion'),
+                App.peticionAPI('/recurso/agente'),
+                App.peticionAPI('/zona/provincia')
+            ]);
+
+            // 2. Extraemos la cantidad de datos (el largo del arreglo) o ponemos 0 si viene vacío
+            const totalRegistros = registros ? registros.length : 0;
+            const totalAcciones = acciones ? acciones.length : 0;
+            const totalAgentes = agentes ? agentes.length : 0;
+            const totalZonas = zonas ? zonas.length : 0;
+
+            // 3. Efecto de contador animado (un pequeño detalle UX que eleva la calidad visual)
+            animarContador('metric-registros', totalRegistros);
+            animarContador('metric-acciones', totalAcciones);
+            animarContador('metric-agentes', totalAgentes);
+            animarContador('metric-zonas', totalZonas);
+
+        } catch (error) {
+            console.error("Error cargando métricas del Dashboard:", error);
+            // Si el backend está apagado, mostramos un error en los números
+            document.getElementById('metric-registros').innerHTML = `<span style="color:red; font-size:1rem;">Error BD</span>`;
+            document.getElementById('metric-acciones').innerHTML = `<span style="color:red; font-size:1rem;">Error BD</span>`;
+            document.getElementById('metric-agentes').innerHTML = `<span style="color:red; font-size:1rem;">Error BD</span>`;
+            document.getElementById('metric-zonas').innerHTML = `<span style="color:red; font-size:1rem;">Error BD</span>`;
+        }
+    }
+
+    /**
+     * Función utilitaria para animar los números del 0 al total real.
+     */
+    function animarContador(idElemento, total) {
+        const elemento = document.getElementById(idElemento);
+        let cuentaActual = 0;
+        const incremento = Math.ceil(total / 30); // Divide la animación en 30 pasos
+        
+        if (total === 0) {
+            elemento.textContent = '0';
+            return;
+        }
+
+        const intervalo = setInterval(() => {
+            cuentaActual += incremento;
+            if (cuentaActual >= total) {
+                cuentaActual = total;
+                clearInterval(intervalo);
+            }
+            elemento.textContent = cuentaActual;
+        }, 30); // 30 milisegundos de velocidad
+    }
+</script>

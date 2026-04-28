@@ -1,0 +1,111 @@
+<div class="card">
+    <h2><i class="fas fa-crosshairs"></i> Gestión de Acciones Específicas</h2>
+    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
+        Administra el catálogo secundario de acciones detalladas para los registros de supervisión.
+    </p>
+    
+    <form id="formAccionEspec">
+        <input type="hidden" id="ID_AE"> 
+
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Descripción de la Acción Específica <span style="color: var(--status-error);">*</span></label>
+                <input type="text" id="ACCION_ESPECIFICA" class="form-control" placeholder="Ej: Revisión de cableado de alta tensión" required>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn btn-primary" id="btnGuardarAccionEspec">
+                <i class="fas fa-save"></i> Guardar Registro
+            </button>
+            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormularioAE()">
+                <i class="fas fa-times-circle"></i> Cancelar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-list-ul"></i> Listado de Acciones Específicas</h2>
+    
+    <div id="contenedorTablaAccionEspec">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Cargando tabla...
+        </div>
+    </div>
+</div>
+
+<script>
+    async function inicializarModulo(vistaID) {
+        if (vistaID !== 'accion_especifica') return;
+
+        cargarTablaAccionEspec();
+
+        const form = document.getElementById('formAccionEspec');
+        
+        // Prevención de eventos duplicados en SPA
+        const nuevoForm = form.cloneNode(true);
+        form.parentNode.replaceChild(nuevoForm, form);
+
+        nuevoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const datos = FormManager.validateAndGetData('formAccionEspec');
+            
+            if (datos) {
+                const idEdicion = document.getElementById('ID_AE').value;
+                const metodo = idEdicion ? 'PUT' : 'POST';
+                // Asumimos que la ruta en el backend será /api/accion_especifica
+                const endpoint = idEdicion ? `/accion_especifica/${idEdicion}` : '/accion_especifica';
+
+                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+                
+                if (respuesta) {
+                    App.mostrarAlerta(idEdicion ? 'Registro actualizado correctamente' : 'Registro creado con éxito');
+                    limpiarFormularioAE();
+                    cargarTablaAccionEspec(); 
+                }
+            }
+        });
+    }
+
+    async function cargarTablaAccionEspec() {
+        const datos = await App.peticionAPI('/accion_especifica'); 
+        
+        if (datos) {
+            const tabla = new DataTable({
+                containerId: 'contenedorTablaAccionEspec',
+                data: datos,
+                columns: [
+                    { key: 'ID_AE', label: 'ID' },
+                    { key: 'ACCION_ESPECIFICA', label: 'Acción Específica' }
+                ],
+                actions: {
+                    idKey: 'ID_AE',
+                    edit: (registro) => {
+                        FormManager.fillForm('formAccionEspec', registro);
+                        document.getElementById('btnGuardarAccionEspec').innerHTML = '<i class="fas fa-sync"></i> Actualizar Registro';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        App.mostrarAlerta('Modifica el texto y presiona Actualizar', 'info');
+                    },
+                    delete: async (id) => {
+                        if (confirm('⚠️ ¿Estás seguro de eliminar esta Acción Específica?')) {
+                            const res = await App.peticionAPI(`/accion_especifica/${id}`, 'DELETE');
+                            if (res) {
+                                App.mostrarAlerta('Registro eliminado exitosamente');
+                                cargarTablaAccionEspec();
+                            }
+                        }
+                    }
+                }
+            });
+            tabla.render();
+        }
+    }
+
+    function limpiarFormularioAE() {
+        FormManager.resetForm('formAccionEspec');
+        document.getElementById('ID_AE').value = '';
+        document.getElementById('btnGuardarAccionEspec').innerHTML = '<i class="fas fa-save"></i> Guardar Registro';
+    }
+</script>

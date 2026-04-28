@@ -1,0 +1,123 @@
+<div class="card">
+    <h2><i class="fas fa-running"></i> Gestión de Actividades</h2>
+    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
+        Define las actividades específicas que se ejecutan dentro de los procesos de supervisión SAE.
+    </p>
+    
+    <form id="formActividad">
+        <input type="hidden" id="ID_ACTIVIDAD"> 
+
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Nombre de la Actividad <span style="color: var(--status-error);">*</span></label>
+                <input type="text" id="NOMBRE_ACTIVIDAD" class="form-control" placeholder="Ej: Inspección de postes de media tensión" required>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn btn-primary" id="btnGuardarActividad">
+                <i class="fas fa-save"></i> Guardar Actividad
+            </button>
+            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormularioActividad()">
+                <i class="fas fa-undo"></i> Cancelar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-clipboard-list"></i> Catálogo de Actividades</h2>
+    
+    <div id="contenedorTablaActividad">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Sincronizando con la base de datos...
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Función de inicialización invocada por el Router (sidebar.js)
+     */
+    async function inicializarModulo(vistaID) {
+        if (vistaID !== 'actividad') return;
+
+        // 1. Cargar datos iniciales
+        cargarTablaActividades();
+
+        // 2. Gestionar el formulario de registro/edición
+        const form = document.getElementById('formActividad');
+        
+        // Limpieza de listeners para evitar duplicidad en la navegación SPA
+        const nuevoForm = form.cloneNode(true);
+        form.parentNode.replaceChild(nuevoForm, form);
+
+        nuevoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validación profesional y extracción de datos
+            const datos = FormManager.validateAndGetData('formActividad');
+            
+            if (datos) {
+                const idEdicion = document.getElementById('ID_ACTIVIDAD').value;
+                const metodo = idEdicion ? 'PUT' : 'POST';
+                // Endpoint esperado: /api/actividad
+                const endpoint = idEdicion ? `/actividad/${idEdicion}` : '/actividad';
+
+                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+                
+                if (respuesta) {
+                    App.mostrarAlerta(idEdicion ? 'Actividad actualizada' : 'Actividad registrada correctamente');
+                    limpiarFormularioActividad();
+                    cargarTablaActividades(); 
+                }
+            }
+        });
+    }
+
+    /**
+     * Obtiene los datos del servidor y renderiza la tabla dinámica
+     */
+    async function cargarTablaActividades() {
+        const datos = await App.peticionAPI('/actividad'); 
+        
+        if (datos) {
+            const tabla = new DataTable({
+                containerId: 'contenedorTablaActividad',
+                data: datos,
+                columns: [
+                    { key: 'ID_ACTIVIDAD', label: 'ID' },
+                    { key: 'NOMBRE_ACTIVIDAD', label: 'Nombre de la Actividad' }
+                ],
+                actions: {
+                    idKey: 'ID_ACTIVIDAD',
+                    edit: (registro) => {
+                        FormManager.fillForm('formActividad', registro);
+                        document.getElementById('btnGuardarActividad').innerHTML = '<i class="fas fa-sync"></i> Actualizar Actividad';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        App.mostrarAlerta('Editando actividad seleccionada', 'info');
+                    },
+                    delete: async (id) => {
+                        if (confirm('¿Confirmas la eliminación de esta actividad? Esta acción no se puede deshacer.')) {
+                            const res = await App.peticionAPI(`/actividad/${id}`, 'DELETE');
+                            if (res) {
+                                App.mostrarAlerta('Actividad eliminada con éxito');
+                                cargarTablaActividades();
+                            }
+                        }
+                    }
+                }
+            });
+            tabla.render();
+        }
+    }
+
+    /**
+     * Resetea el formulario a su estado original
+     */
+    function limpiarFormularioActividad() {
+        FormManager.resetForm('formActividad');
+        document.getElementById('ID_ACTIVIDAD').value = '';
+        document.getElementById('btnGuardarActividad').innerHTML = '<i class="fas fa-save"></i> Guardar Actividad';
+    }
+</script>

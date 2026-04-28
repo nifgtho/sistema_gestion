@@ -1,0 +1,114 @@
+<div class="card">
+    <h2><i class="fas fa-map-marker-alt"></i> Gestión de Provincias</h2>
+    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
+        Registra las provincias que conforman las zonas de supervisión para el despliegue SAE.
+    </p>
+    
+    <form id="formProvincia">
+        <input type="hidden" id="id_zp"> 
+
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Nombre de la Provincia <span style="color: var(--status-error);">*</span></label>
+                <input type="text" id="NOMBRE_PROVINCIA" class="form-control" placeholder="Ej: Huánuco, Leoncio Prado, etc." required>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn btn-primary" id="btnGuardarProvincia">
+                <i class="fas fa-save"></i> Guardar Provincia
+            </button>
+            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormProvincia()">
+                <i class="fas fa-eraser"></i> Limpiar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2><i class="fas fa-map-signs"></i> Provincias Registradas</h2>
+    
+    <div id="contenedorTablaProvincia">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Consultando base de datos...
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Inicialización llamada por el Router
+     */
+    async function inicializarModulo(vistaID) {
+        if (vistaID !== 'zona') return; // En sidebar.js mapeamos 'zona' a este archivo
+
+        cargarTablaProvincias();
+
+        const form = document.getElementById('formProvincia');
+        const nuevoForm = form.cloneNode(true);
+        form.parentNode.replaceChild(nuevoForm, form);
+
+        nuevoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const datos = FormManager.validateAndGetData('formProvincia');
+            
+            if (datos) {
+                const idEdicion = document.getElementById('id_zp').value;
+                const metodo = idEdicion ? 'PUT' : 'POST';
+                // La ruta base en nuestro controlador es /api/zona/provincia
+                const endpoint = idEdicion ? `/zona/provincia/${idEdicion}` : '/zona/provincia';
+
+                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+                
+                if (respuesta) {
+                    App.mostrarAlerta(idEdicion ? 'Provincia actualizada' : 'Provincia registrada con éxito');
+                    limpiarFormProvincia();
+                    cargarTablaProvincias(); 
+                }
+            }
+        });
+    }
+
+    /**
+     * Carga y renderizado de la tabla
+     */
+    async function cargarTablaProvincias() {
+        const datos = await App.peticionAPI('/zona/provincia'); 
+        
+        if (datos) {
+            const tabla = new DataTable({
+                containerId: 'contenedorTablaProvincia',
+                data: datos,
+                columns: [
+                    { key: 'id_zp', label: 'ID' },
+                    { key: 'NOMBRE_PROVINCIA', label: 'Nombre de la Provincia' }
+                ],
+                actions: {
+                    idKey: 'id_zp',
+                    edit: (registro) => {
+                        FormManager.fillForm('formProvincia', registro);
+                        document.getElementById('btnGuardarProvincia').innerHTML = '<i class="fas fa-sync"></i> Actualizar Provincia';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    },
+                    delete: async (id) => {
+                        if (confirm('⚠️ ¿Estás seguro de eliminar esta provincia? Si tiene distritos asociados, el sistema bloqueará la acción.')) {
+                            const res = await App.peticionAPI(`/zona/provincia/${id}`, 'DELETE');
+                            if (res) {
+                                App.mostrarAlerta('Provincia eliminada');
+                                cargarTablaProvincias();
+                            }
+                        }
+                    }
+                }
+            });
+            tabla.render();
+        }
+    }
+
+    function limpiarFormProvincia() {
+        FormManager.resetForm('formProvincia');
+        document.getElementById('id_zp').value = '';
+        document.getElementById('btnGuardarProvincia').innerHTML = '<i class="fas fa-save"></i> Guardar Provincia';
+    }
+</script>
