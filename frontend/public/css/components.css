@@ -1,184 +1,138 @@
-/* ==========================================================================
-   1. FORMULARIOS E INPUTS (Diseño limpio y accesible)
-   ========================================================================== */
-/* Grid dinámico: Acomoda los campos automáticamente (1 columna en móvil, varias en PC) */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-}
+/* =========================================
+   SISTEMA SAE - COMPONENTES REUTILIZABLES
+   Archivo: components.css
+   ========================================= */
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-label {
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--text-dark);
-    margin-bottom: 6px;
-}
-
-/* Estilo unificado para inputs, selects y textareas */
-.form-control {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: var(--font-size-base);
-    font-family: var(--font-family-base);
-    color: var(--text-dark);
-    background-color: #ffffff;
-    border: 1px solid #ced4da;
-    border-radius: var(--border-radius-sm);
-    transition: var(--transition-base);
-    outline: none;
-}
-
-/* Efecto Focus: Cuando el usuario hace clic para escribir */
-.form-control:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15); /* Resplandor azul suave */
-}
-
-.form-control::placeholder {
-    color: var(--text-muted);
-}
-
-/* ==========================================================================
-   2. BOTONES PROFESIONALES (Sistema de variantes)
-   ========================================================================== */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px; /* Espacio entre el ícono y el texto */
-    padding: 10px 18px;
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    text-align: center;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: var(--transition-base);
-}
-
-/* Variantes de color usando nuestras variables */
-.btn-primary {
-    background-color: var(--color-primary);
-    color: var(--text-light);
-}
-
-.btn-primary:hover {
-    background-color: var(--color-primary-hover);
-    transform: translateY(-1px); /* Pequeño efecto de elevación al pasar el cursor */
-}
-
-.btn-success {
-    background-color: var(--status-success);
-    color: var(--text-light);
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
-
-.btn-danger {
-    background-color: var(--status-error);
-    color: var(--text-light);
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-}
-
-.btn-warning {
-    background-color: var(--status-warning);
-    color: #212529; /* Texto oscuro para contrastar con el amarillo */
-}
-
-.btn-warning:hover {
-    background-color: #e0a800;
-}
-
-/* ==========================================================================
-   3. TABLAS DE DATOS (DataTables)
-   ========================================================================== */
-.table-responsive {
-    width: 100%;
-    overflow-x: auto; /* Permite scroll horizontal si la tabla es muy ancha */
-    margin-top: var(--spacing-md);
+/* --- TARJETAS (CARDS) --- */
+.card {
+    background-color: white;
     border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
+    padding: 25px;
+    margin-bottom: var(--spacing-lg);
+    border: none;
 }
 
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--bg-card);
-    text-align: left;
-}
-
-.data-table th, 
-.data-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eaedf1;
-}
-
-.data-table th {
-    background-color: var(--bg-main); /* Fondo sutil para la cabecera */
-    color: var(--text-dark);
-    font-weight: 700;
-    font-size: var(--font-size-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Filas cebra (alterna el color para facilitar la lectura horizontal) */
-.data-table tbody tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-/* Resaltar la fila al pasar el mouse */
-.data-table tbody tr:hover {
-    background-color: rgba(0, 86, 179, 0.04);
-}
-
-/* Opciones de la tabla (Botones pequeñitos para Editar/Eliminar) */
-.data-table .btn-sm {
-    padding: 6px 10px;
-    font-size: 12px;
-}
-
-/* ==========================================================================
-   4. ALERTAS Y NOTIFICACIONES (Feedback visual)
-   ========================================================================== */
-.alert {
-    padding: 15px 20px;
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--spacing-md);
-    font-weight: 500;
+/* Títulos dentro de las cards */
+.card h2, .card h3 {
     display: flex;
     align-items: center;
     gap: 10px;
-    animation: slideDown 0.3s ease-out;
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
 }
 
-/* Tipos de alertas */
-.alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border-left: 5px solid var(--status-success);
+/* --- FORMULARIOS MODERNIZADOS --- */
+form {
+    margin-top: var(--spacing-lg);
 }
 
-.alert-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-left: 5px solid var(--status-error);
+form label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    display: block;
+    margin-bottom: 5px;
 }
 
-/* Animación para que la alerta aparezca cayendo suavemente */
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+form input[type="text"],
+form input[type="number"],
+form select {
+    width: 100%;
+    padding: 10px var(--spacing-md);
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+form input:focus,
+form select:focus {
+    outline: none;
+    border-color: var(--accent-success);
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15); /* Resplandor al hacer clic */
+}
+
+/* --- BOTONES --- */
+button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+button[type="submit"], .btn-primary {
+    background-color: var(--accent-success); /* Verde por defecto para guardar */
+    color: white;
+}
+
+button[type="submit"]:hover, .btn-primary:hover {
+    opacity: 0.9;
+}
+
+button[type="button"] { /* Botón cancelar */
+    background-color: #6c757d;
+    color: white;
+}
+
+/* --- TABLAS SAE --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-md);
+}
+
+thead tr {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+th {
+    padding: 12px 15px;
+    color: #495057;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+}
+
+td {
+    padding: 15px;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    border-bottom: 1px solid #f2f2f2;
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background-color: #fcfdfe; /* Efecto hover en las filas */
+}
+
+/* Botones de acción dentro de la tabla */
+.table-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.table-actions button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+}
+
+.btn-edit { background-color: var(--accent-warning); color: #212529; }
+.btn-delete { background-color: var(--accent-danger); color: white; }

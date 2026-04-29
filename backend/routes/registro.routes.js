@@ -29,6 +29,7 @@ router.post('/', RegistroController.crearRegistro);
 // 4. Eliminar un registro específico por su ID
 router.delete('/:id', RegistroController.eliminarRegistro);
 
+router.put('/:id', RegistroController.actualizarRegistro);
 // Nota: Si en el futuro necesitas la opción de "Actualizar" el registro maestro, 
 // solo agregarías esto: router.put('/:id', RegistroController.actualizarRegistro);
 

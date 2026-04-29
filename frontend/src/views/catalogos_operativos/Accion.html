@@ -1,146 +1,158 @@
-<div class="card">
-    <h2><i class="fas fa-tasks"></i> Gestión de Acciones Operativas</h2>
-    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
-        Registra, edita o elimina las acciones principales que se utilizarán en las supervisiones.
-    </p>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid #0056b3;">
+    <h2 style="color: #0056b3; margin-top: 0; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px;">
+        <i class="fas fa-tasks"></i> <span id="form-title-accion">Nueva Acción Operativa</span>
+    </h2>
     
-    <form id="formAccion">
-        <input type="hidden" id="ID_ACCION"> 
+    <form id="formAccion" style="margin-top: 20px;">
+        <input type="hidden" id="edit_id_accion" value="">
 
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Nombre Abreviado <span style="color: var(--status-error);">*</span></label>
-                <input type="text" id="NOMBRE_ABREVIADO" class="form-control" placeholder="Ej: MANT" required>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Nombre Abreviado <span style="color: red;">*</span></label>
+                <input type="text" id="NOMBRE_ABREVIADO" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: MANT">
             </div>
             
-            <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label">Nombre de la Acción <span style="color: var(--status-error);">*</span></label>
-                <input type="text" id="NOMBRE_ACCION" class="form-control" placeholder="Ej: Mantenimiento Preventivo" required>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Nombre de la Acción <span style="color: red;">*</span></label>
+                <input type="text" id="NOMBRE_ACCION" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: Mantenimiento Preventivo">
+            </div>
+            
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Código A.E. (Opcional)</label>
+                <input type="text" id="CODIGO_A_E" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: AE-01">
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Código A.E. (Opcional)</label>
-                <input type="text" id="CODIGO_A_E" class="form-control" placeholder="Ej: AE-01">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Código P. Acción (Opcional)</label>
-                <input type="text" id="CODIGO_P_ACCION" class="form-control" placeholder="Ej: PA-01">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Código P. Acción (Opcional)</label>
+                <input type="text" id="CODIGO_P_ACCION" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: 10025">
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="submit" class="btn btn-primary" id="btnGuardarAccion">
-                <i class="fas fa-save"></i> Guardar Acción
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button type="submit" id="btnGuardarAccion" style="background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> <span id="btn-text-accion">Guardar Acción</span>
             </button>
-            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormularioAccion()">
-                <i class="fas fa-times-circle"></i> Cancelar / Limpiar
+            <button type="button" onclick="cancelarEdicionAccion()" id="btnCancelarEditAccion" style="display: none; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Cancelar
             </button>
         </div>
     </form>
 </div>
 
-<div class="card">
-    <h2><i class="fas fa-list"></i> Catálogo de Acciones Registradas</h2>
-    
-    <div id="contenedorTablaAccion">
-        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-            <i class="fas fa-spinner fa-spin"></i> Cargando tabla...
-        </div>
-    </div>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; color: #2c3e50;"><i class="fas fa-list"></i> Acciones Registradas</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px; color: #495057;">ID</th>
+                <th style="padding: 12px; color: #495057;">Abreviatura</th>
+                <th style="padding: 12px; color: #495057;">Acción</th>
+                <th style="padding: 12px; color: #495057;">Cód. AE / PA</th>
+                <th style="padding: 12px; text-align: center; color: #495057;">Opciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyAcciones"></tbody>
+    </table>
 </div>
 
 <script>
-    /**
-     * Función principal. Es llamada por sidebar.js cuando el usuario hace clic en el menú.
-     */
-    async function inicializarModulo(vistaID) {
+    window.inicializarModulo = function(vistaID) {
         if (vistaID !== 'accion') return;
 
-        // 1. Cargamos la tabla apenas se abre la ventana
-        cargarTablaAcciones();
-
-        // 2. Configuramos el evento de guardar el formulario
         const form = document.getElementById('formAccion');
-        
-        // Removemos eventos previos para evitar que se guarde doble si entramos y salimos de la vista
         const nuevoForm = form.cloneNode(true);
         form.parentNode.replaceChild(nuevoForm, form);
 
+        cargarTablaAcciones();
+
         nuevoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnGuardar = document.getElementById('btnGuardarAccion');
+            const idEdit = document.getElementById('edit_id_accion').value;
 
-            // Usamos nuestro validador: Extrae los datos y pinta de rojo si algo falta
-            const datos = FormManager.validateAndGetData('formAccion');
-            
-            if (datos) {
-                const idEdicion = document.getElementById('ID_ACCION').value;
-                const metodo = idEdicion ? 'PUT' : 'POST';
-                const endpoint = idEdicion ? `/accion/${idEdicion}` : '/accion';
+            btnGuardar.disabled = true;
 
-                // Enviamos los datos a Node.js
-                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
-                
-                if (respuesta) {
-                    App.mostrarAlerta(idEdicion ? 'Acción actualizada correctamente' : 'Acción registrada con éxito');
-                    limpiarFormularioAccion();
-                    cargarTablaAcciones(); // Refrescamos la tabla para ver el nuevo dato
-                }
+            const datos = {
+                NOMBRE_ABREVIADO: document.getElementById('NOMBRE_ABREVIADO').value,
+                NOMBRE_ACCION: document.getElementById('NOMBRE_ACCION').value,
+                CODIGO_A_E: document.getElementById('CODIGO_A_E').value,
+                CODIGO_P_ACCION: document.getElementById('CODIGO_P_ACCION').value
+            };
+
+            const endpoint = idEdit ? `${Endpoints.ACCION}/${idEdit}` : Endpoints.ACCION;
+            const metodo = idEdit ? 'PUT' : 'POST';
+
+            const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+
+            if (respuesta) {
+                App.mostrarAlerta(idEdit ? 'Acción actualizada' : 'Acción registrada', 'success');
+                cancelarEdicionAccion();
+                cargarTablaAcciones();
             }
+
+            btnGuardar.disabled = false;
         });
     }
 
-    /**
-     * Consulta al Backend y dibuja la tabla con opciones de Editar y Eliminar
-     */
     async function cargarTablaAcciones() {
-        const datos = await App.peticionAPI('/accion'); 
-        
-        if (datos) {
-            const tabla = new DataTable({
-                containerId: 'contenedorTablaAccion',
-                data: datos,
-                columns: [
-                    { key: 'ID_ACCION', label: 'ID' },
-                    { key: 'NOMBRE_ABREVIADO', label: 'Abrev.' },
-                    { key: 'NOMBRE_ACCION', label: 'Nombre de la Acción' },
-                    { key: 'CODIGO_A_E', label: 'Cód. AE' }
-                ],
-                actions: {
-                    idKey: 'ID_ACCION',
-                    // Lógica cuando presionan el botón amarillo (Editar)
-                    edit: (registro) => {
-                        FormManager.fillForm('formAccion', registro);
-                        
-                        // Cambiamos el texto del botón para que el usuario sepa que está editando
-                        document.getElementById('btnGuardarAccion').innerHTML = '<i class="fas fa-sync"></i> Actualizar Acción';
-                        
-                        // Hacemos scroll suave hacia arriba
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        App.mostrarAlerta('Modifica los datos y presiona Actualizar', 'info');
-                    },
-                    // Lógica cuando presionan el botón rojo (Eliminar)
-                    delete: async (id) => {
-                        if (confirm('⚠️ ¿Estás seguro de eliminar esta acción de forma permanente?')) {
-                            const res = await App.peticionAPI(`/accion/${id}`, 'DELETE');
-                            if (res) {
-                                App.mostrarAlerta('Acción eliminada exitosamente');
-                                cargarTablaAcciones();
-                            }
-                        }
-                    }
-                }
-            });
-            tabla.render();
+        const tbody = document.getElementById('tbodyAcciones');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+
+        const acciones = await App.peticionAPI(Endpoints.ACCION, 'GET');
+
+        if (!acciones || acciones.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No hay datos.</td></tr>';
+            return;
         }
+
+        tbody.innerHTML = acciones.map(acc => `
+            <tr style="border-bottom: 1px solid #e9ecef;">
+                <td style="padding: 12px;"><strong>${acc.ID_ACCION}</strong></td>
+                <td style="padding: 12px;"><span style="background: #e2e3e5; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight:bold;">${acc.NOMBRE_ABREVIADO}</span></td>
+                <td style="padding: 12px;">${acc.NOMBRE_ACCION}</td>
+                <td style="padding: 12px; font-size: 0.85rem;">
+                    AE: ${acc.CODIGO_A_E || '-'}<br>
+                    PA: ${acc.CODIGO_P_ACCION || '-'}
+                </td>
+                <td style="padding: 12px; text-align:center; display:flex; gap:10px; justify-content:center;">
+                    <button onclick="prepararEdicionAccion(${acc.ID_ACCION}, '${acc.NOMBRE_ABREVIADO}', '${acc.NOMBRE_ACCION}', '${acc.CODIGO_A_E || ''}', '${acc.CODIGO_P_ACCION || ''}')" style="background:#ffc107; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarAccion(${acc.ID_ACCION})" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    /**
-     * Limpia el formulario y resetea el botón a su estado original
-     */
-    function limpiarFormularioAccion() {
-        FormManager.resetForm('formAccion');
-        document.getElementById('ID_ACCION').value = '';
-        document.getElementById('btnGuardarAccion').innerHTML = '<i class="fas fa-save"></i> Guardar Acción';
+    window.prepararEdicionAccion = function(id, abrev, nombre, cae, cpa) {
+        document.getElementById('edit_id_accion').value = id;
+        document.getElementById('NOMBRE_ABREVIADO').value = abrev;
+        document.getElementById('NOMBRE_ACCION').value = nombre;
+        document.getElementById('CODIGO_A_E').value = cae;
+        document.getElementById('CODIGO_P_ACCION').value = cpa;
+        
+        document.getElementById('form-title-accion').innerText = 'Editando Acción';
+        document.getElementById('btn-text-accion').innerText = 'Actualizar Datos';
+        document.getElementById('btnCancelarEditAccion').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.cancelarEdicionAccion = function() {
+        document.getElementById('edit_id_accion').value = '';
+        document.getElementById('formAccion').reset();
+        document.getElementById('form-title-accion').innerText = 'Nueva Acción Operativa';
+        document.getElementById('btn-text-accion').innerText = 'Guardar Acción';
+        document.getElementById('btnCancelarEditAccion').style.display = 'none';
+    }
+
+    window.eliminarAccion = async function(id) {
+        if (!confirm('¿Seguro que deseas eliminar esta acción?')) return;
+        const respuesta = await App.peticionAPI(`${Endpoints.ACCION}/${id}`, 'DELETE');
+        if (respuesta) {
+            App.mostrarAlerta('Acción eliminada', 'success');
+            cargarTablaAcciones();
+        }
     }
 </script>

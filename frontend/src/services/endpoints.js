@@ -1,35 +1,34 @@
 /**
  * ============================================================================
- * REGISTRO DE ENDPOINTS (Rutas de la API)
- * Archivo: frontend/src/js/endpoints.js
+ * ENDPOINTS DE LA API (Sincronizados con el Backend)
+ * Archivo: frontend/src/services/endpoints.js
  * ============================================================================
  */
 
 const Endpoints = {
-    // Módulo Principal (Supervisiones)
+    // Módulo Principal (Registro Central)
     REGISTRO: {
-        BASE: '/detalle_registro',
-        DATOS_FORM: '/detalle_registro/datos-formulario'
+        BASE: '/api/detalle_registro',
+        DATOS_FORM: '/api/detalle_registro/datos-formulario'
     },
 
-    // Catálogo Operativo
-    ACCION: '/accion',
-    ACCION_ESPECIFICA: '/accion_especifica',
-    SUBACCION: '/subaccion',
-    ACTIVIDAD: '/actividad',
+    // Catálogos Operativos
+    ACCION: '/api/accion',
+    ACCION_ESPECIFICA: '/api/accion_especifica',
+    SUBACCION: '/api/subaccion',
+    ACTIVIDAD: '/api/actividad',
 
-    // Catálogo de Entorno (Zonas)
+    // Catálogos de Entorno (Zonas)
     ZONA: {
-        PROVINCIA: '/zona/provincia',
-        DISTRITO: '/zona/distrito'
+        PROVINCIA: '/api/zona/provincia',
+        DISTRITO: '/api/zona/distrito'
     },
 
-    // Catálogo de Recursos
+    // Catálogos de Recursos
     RECURSO: {
-        AGENTE: '/recurso/agente',
-        TRANSPORTE: '/recurso/transporte'
+        AGENTE: '/api/recurso/agente',
+        TRANSPORTE: '/api/recurso/transporte'
     }
 };
 
-// Lo hacemos global para que sea fácil de llamar en los HTML
 window.Endpoints = Endpoints;

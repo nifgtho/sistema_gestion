@@ -1,215 +1,254 @@
-<div class="card">
-    <h2><i class="fas fa-file-signature"></i> Nuevo Registro de Supervisión</h2>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; border-top: 4px solid #0056b3;">
+    <h2 style="color: #0056b3; margin-top: 0; margin-bottom: 20px;">
+        <i class="fas fa-file-medical"></i> Nuevo Registro de Supervisión
+    </h2>
     
-    <form id="formDetalleRegistro">
-        <input type="hidden" id="ID_REGISTRO">
+    <form id="formRegistroCentral">
+        
+        <input type="hidden" id="edit_id_registro" value="">
 
-        <h3 style="font-size: 1rem; color: var(--color-secondary); margin: 15px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">1. Clasificación de la Operación</h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Acción Principal *</label>
-                <select id="ID_ACCION" class="form-control" required>
-                    <option value="">Cargando acciones...</option>
-                </select>
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; color: #2c3e50; font-size: 1.1rem;"><i class="fas fa-map-marked-alt"></i> 1. Ubicación</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Provincia</label>
+                <select id="id_zp" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;"></select>
             </div>
-            <div class="form-group">
-                <label class="form-label">Acción Específica</label>
-                <select id="ID_AE" class="form-control">
-                    <option value="">Seleccione...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Sub Acción</label>
-                <select id="ID_SA" class="form-control">
-                    <option value="">Seleccione...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Actividad *</label>
-                <select id="ID_ACTIVIDAD" class="form-control" required>
-                    <option value="">Cargando actividades...</option>
-                </select>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Distrito</label>
+                <select id="id_zd" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;"></select>
             </div>
         </div>
 
-        <h3 style="font-size: 1rem; color: var(--color-secondary); margin: 20px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">2. Entorno y Recursos</h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Provincia *</label>
-                <select id="id_zp" class="form-control" required>
-                    <option value="">Cargando provincias...</option>
-                </select>
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; color: #2c3e50; font-size: 1.1rem;"><i class="fas fa-cogs"></i> 2. Datos Operativos</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Acción General</label>
+                <select id="ID_ACCION" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;"></select>
             </div>
-            <div class="form-group">
-                <label class="form-label">Distrito *</label>
-                <select id="id_zd" class="form-control" required>
-                    <option value="">Cargando distritos...</option>
-                </select>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Acción Específica</label>
+                <select id="ID_AE" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;"></select>
             </div>
-            <div class="form-group">
-                <label class="form-label">Tipo de Agente</label>
-                <select id="ID_TA" class="form-control">
-                    <option value="">Seleccione agente...</option>
-                </select>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Subacción</label>
+                <select id="ID_SA" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;"></select>
             </div>
-            <div class="form-group">
-                <label class="form-label">Medio de Transporte</label>
-                <select id="id_tt" class="form-control">
-                    <option value="">Seleccione transporte...</option>
-                </select>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Actividad</label>
+                <select id="ID_ACTIVIDAD" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;"></select>
             </div>
         </div>
 
-        <h3 style="font-size: 1rem; color: var(--color-secondary); margin: 20px 0 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">3. Documentación y Resultados</h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Empresa Supervisora *</label>
-                <input type="text" id="EMPRESA_SUPERVISORA" class="form-control" placeholder="Nombre de la empresa" required>
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; color: #2c3e50; font-size: 1.1rem;"><i class="fas fa-users-cog"></i> 3. Recursos Asignados</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Tipo de Agente</label>
+                <select id="ID_TA" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;"></select>
             </div>
-            <div class="form-group">
-                <label class="form-label">Nro. Expediente</label>
-                <input type="text" id="NRO_EXPEDIENTE" class="form-control" placeholder="Ej: EXP-2026-001">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Contrato</label>
-                <input type="text" id="CONTRATO" class="form-control" placeholder="Nro. de contrato">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Carta Línea</label>
-                <input type="text" id="CARTA_LINEA" class="form-control" placeholder="Referencia carta línea">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Medio de Transporte</label>
+                <select id="id_tt" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;"></select>
             </div>
         </div>
 
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Nro. Supervisores Asignados</label>
-                <input type="number" id="NUM_SUPERVISORES" class="form-control" placeholder="0" min="0">
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; color: #2c3e50; font-size: 1.1rem;"><i class="fas fa-folder-open"></i> 4. Datos del Expediente</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Nro. Expediente</label>
+                <input type="text" id="NRO_EXPEDIENTE" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
             </div>
-            <div class="form-group">
-                <label class="form-label">Calidad Entregable</label>
-                <input type="text" id="CALIDAD_ENTREGABLE" class="form-control" placeholder="Ej: Conforme, Observado">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Empresa Supervisora</label>
+                <input type="text" id="EMPRESA_SUPERVISORA" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
+            </div>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Nro. Supervisores</label>
+                <input type="text" id="NUM_SUPERVISORES" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
+            </div>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Contrato</label>
+                <input type="text" id="CONTRATO" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
+            </div>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Calidad Entregable</label>
+                <input type="text" id="CALIDAD_ENTREGABLE" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
+            </div>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Carta Línea</label>
+                <input type="text" id="CARTA_LINEA" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="font-weight: 600; font-size: 0.9rem;">Observaciones</label>
+                <input type="text" id="OBSERVACIONES" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
             </div>
         </div>
 
-        <div class="form-group" style="margin-top: 10px;">
-            <label class="form-label">Observaciones Adicionales</label>
-            <textarea id="OBSERVACIONES" class="form-control" rows="3" placeholder="Detalles relevantes de la supervisión..."></textarea>
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-top: 25px;">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Guardar Registro Maestro
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" id="btnGuardarRegistro" style="background: #0056b3; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem;">
+                <i class="fas fa-save"></i> <span id="btn-text-registro">Procesar Registro Central</span>
             </button>
-            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="FormManager.resetForm('formDetalleRegistro'); document.getElementById('ID_REGISTRO').value = '';">
-                <i class="fas fa-eraser"></i> Limpiar Formulario
+            <button type="button" onclick="cancelarEdicionRegistro()" id="btnCancelarEditRegistro" style="display: none; background: #6c757d; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">
+                Cancelar Edición
             </button>
         </div>
     </form>
 </div>
 
-<div class="card">
-    <h2><i class="fas fa-table"></i> Historial de Supervisiones</h2>
-    <div id="contenedorTablaRegistro"></div>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0;"><i class="fas fa-list-alt"></i> Historial de Registros</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px;">ID</th>
+                <th style="padding: 12px;">Expediente</th>
+                <th style="padding: 12px;">Empresa</th>
+                <th style="padding: 12px;">Acción General</th>
+                <th style="padding: 12px;">Agente</th>
+                <th style="padding: 12px; text-align: center;">Opciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyRegistrosMain"></tbody>
+    </table>
 </div>
 
 <script>
-    async function inicializarModulo(vistaID) {
+    // Variable global para guardar los datos y no tener que ir a la BD de nuevo al editar
+    window.registrosGlobalesSAE = []; 
+
+    window.inicializarModulo = async function(vistaID) {
         if (vistaID !== 'detalle_registro') return;
 
-        // 1. Cargar las listas desplegables (Catálogos) y la tabla de datos
+        const form = document.getElementById('formRegistroCentral');
+        const nuevoForm = form.cloneNode(true);
+        form.parentNode.replaceChild(nuevoForm, form);
+
         await cargarCatalogosSelect();
-        cargarTablaRegistros();
+        await cargarTablaRegistros();
 
-        // 2. Lógica para Guardar o Actualizar
-        const form = document.getElementById('formDetalleRegistro');
-        form.addEventListener('submit', async (e) => {
+        nuevoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnGuardar = document.getElementById('btnGuardarRegistro');
+            btnGuardar.disabled = true;
 
-            // Extraemos toda la data empaquetada. Los campos vacíos opcionales se enviarán como ''
-            const datos = FormManager.validateAndGetData('formDetalleRegistro');
+            const idEdit = document.getElementById('edit_id_registro').value;
+            const camposFormulario = ['ID_ACCION', 'ID_AE', 'ID_SA', 'ID_TA', 'id_tt', 'id_zd', 'id_zp', 'ID_ACTIVIDAD', 'NUM_SUPERVISORES', 'EMPRESA_SUPERVISORA', 'CALIDAD_ENTREGABLE', 'NRO_EXPEDIENTE', 'CARTA_LINEA', 'OBSERVACIONES', 'CONTRATO'];
             
-            if (datos) {
-                const idEdicion = document.getElementById('ID_REGISTRO').value;
-                const metodo = idEdicion ? 'PUT' : 'POST';
-                const endpoint = idEdicion ? `/detalle_registro/${idEdicion}` : '/detalle_registro';
+            let datos = {};
+            camposFormulario.forEach(campo => {
+                datos[campo] = document.getElementById(campo).value || null;
+            });
 
-                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
-                
-                if (respuesta) {
-                    App.mostrarAlerta(idEdicion ? 'Registro actualizado' : 'Registro maestro creado con éxito');
-                    FormManager.resetForm('formDetalleRegistro');
-                    document.getElementById('ID_REGISTRO').value = '';
-                    cargarTablaRegistros(); 
-                }
+            const endpoint = idEdit ? `${Endpoints.REGISTRO.BASE}/${idEdit}` : Endpoints.REGISTRO.BASE;
+            const metodo = idEdit ? 'PUT' : 'POST';
+
+            const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+
+            if (respuesta) {
+                App.mostrarAlerta(idEdit ? 'Registro actualizado' : 'Registro guardado', 'success');
+                cancelarEdicionRegistro(); // Limpia todo
+                cargarTablaRegistros();
+            }
+
+            btnGuardar.disabled = false;
+        });
+    }
+
+    async function cargarCatalogosSelect() {
+        const catalogos = await App.peticionAPI(Endpoints.REGISTRO.DATOS_FORM, 'GET');
+        if(!catalogos) return; 
+
+        const llenarCombo = (idElemento, arrayDatos, propValor, propTexto, textoDefault) => {
+            const select = document.getElementById(idElemento);
+            let html = `<option value="" selected>-- ${textoDefault} --</option>`;
+            if(arrayDatos && arrayDatos.length > 0) {
+                arrayDatos.forEach(item => {
+                    html += `<option value="${item[propValor]}">${item[propTexto]}</option>`;
+                });
+            }
+            select.innerHTML = html;
+        };
+
+        llenarCombo('id_zp', catalogos.provincias, 'id_zp', 'NOMBRE_PROVINCIA', 'Seleccionar Provincia');
+        llenarCombo('id_zd', catalogos.distritos, 'id_zd', 'NOMBRE_DISTRITO', 'Seleccionar Distrito');
+        llenarCombo('ID_ACCION', catalogos.acciones, 'ID_ACCION', 'NOMBRE_ACCION', 'Seleccionar Acción');
+        llenarCombo('ID_AE', catalogos.accionesEspec, 'ID_AE', 'ACCION_ESPECIFICA', 'Seleccionar Acc. Específica');
+        llenarCombo('ID_SA', catalogos.subacciones, 'ID_SA', 'SUB_ACCION_ESP', 'Seleccionar Subacción');
+        llenarCombo('ID_ACTIVIDAD', catalogos.actividades, 'ID_ACTIVIDAD', 'NOMBRE_ACTIVIDAD', 'Seleccionar Actividad');
+        llenarCombo('ID_TA', catalogos.tiposAgente, 'ID_TA', 'NOMBRE_TA', 'Seleccionar Agente');
+        llenarCombo('id_tt', catalogos.tiposTransporte, 'id_tt', 'NOMBRE_TRANSPORTE', 'Seleccionar Transporte');
+    }
+
+    async function cargarTablaRegistros() {
+        const tbody = document.getElementById('tbodyRegistrosMain');
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><i class="fas fa-sync fa-spin"></i> Cargando...</td></tr>';
+
+        const datos = await App.peticionAPI(Endpoints.REGISTRO.BASE, 'GET');
+        
+        if (!datos || datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No hay registros en el sistema</td></tr>';
+            return;
+        }
+
+        window.registrosGlobalesSAE = datos; // Guardamos en memoria para editar rápido
+
+        tbody.innerHTML = datos.map(r => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding:12px;"><strong>${r.ID_REGISTRO}</strong></td>
+                <td style="padding:12px; font-weight:500; color:#0056b3;">${r.NRO_EXPEDIENTE || 'Sin Nro'}</td>
+                <td style="padding:12px;">${r.EMPRESA_SUPERVISORA || '-'}</td>
+                <td style="padding:12px;">${r.NOMBRE_ACCION || '-'}</td>
+                <td style="padding:12px;"><i class="fas fa-user-tie"></i> ${r.AGENTE || '-'}</td>
+                <td style="padding:12px; text-align:center; display:flex; gap:10px; justify-content:center;">
+                    <button onclick="prepararEdicionRegistro(${r.ID_REGISTRO})" style="background:#ffc107; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarRegistroFinal(${r.ID_REGISTRO})" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // 🔴 LA MAGIA DE LA EDICIÓN RÁPIDA
+    window.prepararEdicionRegistro = function(id) {
+        // Buscamos los datos exactos de ese registro en nuestra memoria
+        const registro = window.registrosGlobalesSAE.find(r => r.ID_REGISTRO === id);
+        if (!registro) return;
+
+        document.getElementById('edit_id_registro').value = id;
+
+        // Llenamos automáticamente todos los 15 campos
+        const camposFormulario = ['ID_ACCION', 'ID_AE', 'ID_SA', 'ID_TA', 'id_tt', 'id_zd', 'id_zp', 'ID_ACTIVIDAD', 'NUM_SUPERVISORES', 'EMPRESA_SUPERVISORA', 'CALIDAD_ENTREGABLE', 'NRO_EXPEDIENTE', 'CARTA_LINEA', 'OBSERVACIONES', 'CONTRATO'];
+        
+        camposFormulario.forEach(campo => {
+            const input = document.getElementById(campo);
+            if (input) {
+                input.value = registro[campo] || '';
             }
         });
+
+        // Cambiamos el diseño visual
+        document.getElementById('btn-text-registro').innerText = 'Actualizar Registro Maestro';
+        document.getElementById('btnGuardarRegistro').style.background = '#28a745';
+        document.getElementById('btnCancelarEditRegistro').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    /**
-     * Trae todos los catálogos del servidor en 1 sola petición para no saturar la red
-     */
-    async function cargarCatalogosSelect() {
-        const datos = await App.peticionAPI('/detalle_registro/datos-formulario');
-        
-        if (datos) {
-            // Usamos una función auxiliar para llenar cada <select> rápidamente
-            llenarSelect('ID_ACCION', datos.acciones, 'ID_ACCION', 'NOMBRE_ACCION', 'Seleccione Acción...');
-            llenarSelect('ID_AE', datos.accionesEspec, 'ID_AE', 'ACCION_ESPECIFICA', 'Seleccione A.E...');
-            llenarSelect('ID_SA', datos.subacciones, 'ID_SA', 'SUB_ACCION_ESP', 'Seleccione Sub Acción...');
-            llenarSelect('ID_ACTIVIDAD', datos.actividades, 'ID_ACTIVIDAD', 'NOMBRE_ACTIVIDAD', 'Seleccione Actividad...');
-            llenarSelect('id_zp', datos.provincias, 'id_zp', 'NOMBRE_PROVINCIA', 'Seleccione Provincia...');
-            llenarSelect('id_zd', datos.distritos, 'id_zd', 'NOMBRE_DISTRITO', 'Seleccione Distrito...');
-            llenarSelect('ID_TA', datos.tiposAgente, 'ID_TA', 'NOMBRE_TA', 'Seleccione Agente...');
-            llenarSelect('id_tt', datos.tiposTransporte, 'id_tt', 'NOMBRE_TRANSPORTE', 'Seleccione Transporte...');
-        }
+    window.cancelarEdicionRegistro = function() {
+        document.getElementById('edit_id_registro').value = '';
+        document.getElementById('formRegistroCentral').reset();
+        document.getElementById('btn-text-registro').innerText = 'Procesar Registro Central';
+        document.getElementById('btnGuardarRegistro').style.background = '#0056b3';
+        document.getElementById('btnCancelarEditRegistro').style.display = 'none';
     }
 
-    /**
-     * Función utilitaria para construir los <option> de HTML
-     */
-    function llenarSelect(elementId, arrayDatos, keyId, keyTexto, textoDefault) {
-        const select = document.getElementById(elementId);
-        if (!select) return;
-
-        let html = `<option value="">-- ${textoDefault} --</option>`;
-        arrayDatos.forEach(item => {
-            html += `<option value="${item[keyId]}">${item[keyTexto]}</option>`;
-        });
-        select.innerHTML = html;
-    }
-
-    /**
-     * Carga el historial en nuestra DataTable profesional
-     */
-    async function cargarTablaRegistros() {
-        const datos = await App.peticionAPI('/detalle_registro');
-        
-        if (datos) {
-            const tabla = new DataTable({
-                containerId: 'contenedorTablaRegistro',
-                data: datos,
-                columns: [
-                    { key: 'ID_REGISTRO', label: 'ID' },
-                    { key: 'NRO_EXPEDIENTE', label: 'Expediente' },
-                    { key: 'EMPRESA_SUPERVISORA', label: 'Empresa' },
-                    // Usamos el 'LEFT JOIN' que hicimos en el backend para mostrar texto y no números
-                    { key: 'NOMBRE_ACCION', label: 'Acción' }, 
-                    { key: 'AGENTE', label: 'Agente Asignado' }
-                ],
-                actions: {
-                    idKey: 'ID_REGISTRO',
-                    delete: async (id) => {
-                        if (confirm('Alerta Crítica: ¿Estás seguro de eliminar este Registro Maestro de Supervisión de forma permanente?')) {
-                            const res = await App.peticionAPI(`/detalle_registro/${id}`, 'DELETE');
-                            if (res) {
-                                App.mostrarAlerta('Registro eliminado permanentemente.');
-                                cargarTablaRegistros();
-                            }
-                        }
-                    }
-                }
-            });
-            tabla.render();
+    window.eliminarRegistroFinal = async function(id) {
+        if (!confirm('¿Estás seguro de eliminar este registro maestro de forma permanente?')) return;
+        const respuesta = await App.peticionAPI(`${Endpoints.REGISTRO.BASE}/${id}`, 'DELETE');
+        if (respuesta) {
+            App.mostrarAlerta('Registro eliminado', 'success');
+            cargarTablaRegistros();
         }
     }
 </script>

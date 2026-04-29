@@ -1,17 +1,16 @@
 /**
  * ============================================================================
- * MOTOR DE COMUNICACIÓN API (Capa de Servicio)
- * Archivo: frontend/src/js/api.js
+ * MOTOR DE COMUNICACIÓN CON EL BACKEND
+ * Archivo: frontend/src/services/api.js
  * ============================================================================
  */
 
 const App = {
-    // La URL base donde corre tu servidor Node.js (Configurado en server.js)
-    BASE_URL: '/api',
-
     /**
-     * Función Maestra para peticiones HTTP (GET, POST, PUT, DELETE)
-     * Centraliza el manejo de errores y la conversión a JSON.
+     * Función central para hablar con Node.js
+     * @param {string} endpoint - La ruta (ej. Endpoints.ACCION)
+     * @param {string} metodo - 'GET', 'POST', 'PUT', 'DELETE'
+     * @param {object} datos - Los datos del formulario a guardar
      */
     async peticionAPI(endpoint, metodo = 'GET', datos = null) {
         try {
@@ -22,51 +21,71 @@ const App = {
                 }
             };
 
-            // Si enviamos datos (POST o PUT), los convertimos a texto JSON
             if (datos) {
                 opciones.body = JSON.stringify(datos);
             }
 
-            const respuesta = await fetch(`${this.BASE_URL}${endpoint}`, opciones);
+            const respuesta = await fetch(endpoint, opciones);
+            
+            // --- EL ESCUDO: Verificamos si la respuesta es realmente JSON ---
+            const esJson = respuesta.headers.get("content-type")?.includes("application/json");
+
+            if (!esJson) {
+                console.warn(`⚠️ Aviso: La ruta ${endpoint} no devolvió datos (Probablemente la ruta aún no está creada en Node.js)`);
+                return null; // Retornamos null en silencio para no romper la pantalla
+            }
+
             const resultado = await respuesta.json();
 
-            // Si el servidor responde con un error (400, 404, 500, etc.)
             if (!respuesta.ok) {
-                // Usamos nuestra alerta visual para informar al usuario
-                this.mostrarAlerta(resultado.error || 'Ocurrió un error inesperado', 'error');
+                this.mostrarAlerta(resultado.error || 'Ocurrió un error en el servidor.', 'error');
                 return null;
             }
 
             return resultado;
 
         } catch (error) {
-            console.error('Error de conexión:', error);
-            this.mostrarAlerta('No se pudo conectar con el servidor. Verifica que Node.js esté encendido.', 'error');
+            console.error('❌ Error de conexión:', error);
+            this.mostrarAlerta('No se pudo conectar con el servidor local.', 'error');
             return null;
         }
     },
-
-    /**
-     * Sistema de Notificaciones Visuales (Toast)
-     * Crea un pequeño mensaje que desaparece a los 3 segundos.
-     */
     mostrarAlerta(mensaje, tipo = 'success') {
-        // Creamos el elemento de la alerta
         const alerta = document.createElement('div');
-        alerta.className = `alerta-flotante alerta-${tipo}`;
-        
-        // Icono según el tipo
+        const colorFondo = tipo === 'success' ? '#28a745' : '#dc3545';
         const icono = tipo === 'success' ? 'check-circle' : 'exclamation-triangle';
         
-        alerta.innerHTML = `
-            <i class="fas fa-${icono}"></i>
-            <span>${mensaje}</span>
+        // Estilos en línea para asegurar que siempre se vea bien sin depender de CSS externo
+        alerta.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: ${colorFondo};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 500;
+            transition: all 0.5s ease-in-out;
+            transform: translateY(-20px);
+            opacity: 0;
         `;
-
-        // Lo añadimos al cuerpo del documento
+        
+        alerta.innerHTML = `<i class="fas fa-${icono} fa-lg"></i> <span>${mensaje}</span>`;
         document.body.appendChild(alerta);
 
-        // Animación de salida y eliminación
+        // Animación de entrada
+        setTimeout(() => {
+            alerta.style.transform = 'translateY(0)';
+            alerta.style.opacity = '1';
+        }, 10);
+
+        // Autodestrucción después de 3 segundos
         setTimeout(() => {
             alerta.style.opacity = '0';
             alerta.style.transform = 'translateY(-20px)';
@@ -75,5 +94,5 @@ const App = {
     }
 };
 
-// Exportamos para uso global si fuera necesario
+// Exponemos App globalmente para usarlo en las vistas HTML
 window.App = App;

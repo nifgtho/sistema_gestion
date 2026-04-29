@@ -1,111 +1,150 @@
-<div class="card">
-    <h2><i class="fas fa-crosshairs"></i> Gestión de Acciones Específicas</h2>
-    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
-        Administra el catálogo secundario de acciones detalladas para los registros de supervisión.
-    </p>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; border-top: 4px solid #28a745;">
+    <h2 style="color: #28a745; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-crosshairs"></i> <span id="form-title-ae">Nueva Acción Específica</span>
+    </h2>
     
-    <form id="formAccionEspec">
-        <input type="hidden" id="ID_AE"> 
+    <form id="formAccionEspec" style="margin-top: 20px;">
+        <input type="hidden" id="edit_id_ae" value="">
+        
+        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 15px;">
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Nombre Abreviado <span style="color: red;">*</span></label>
+                <input type="text" id="NOMBRE_ABREVIADO" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: ASIST-MED">
+            </div>
 
-        <div class="form-grid">
-            <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label">Descripción de la Acción Específica <span style="color: var(--status-error);">*</span></label>
-                <input type="text" id="ACCION_ESPECIFICA" class="form-control" placeholder="Ej: Revisión de cableado de alta tensión" required>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Acción Específica <span style="color: red;">*</span></label>
+                <input type="text" id="ACCION_ESPECIFICA" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: Asistencia Médica General">
+            </div>
+
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Código A.E. <span style="color: red;">*</span></label>
+                <input type="text" id="CODIGO_A_E" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: AE-001">
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="submit" class="btn btn-primary" id="btnGuardarAccionEspec">
-                <i class="fas fa-save"></i> Guardar Registro
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button type="submit" id="btnGuardarAE" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> <span id="btn-text-ae">Guardar Registro</span>
             </button>
-            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormularioAE()">
-                <i class="fas fa-times-circle"></i> Cancelar
+            <button type="button" onclick="cancelarEdicionAE()" id="btnCancelarEditAE" style="display: none; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Cancelar
             </button>
         </div>
     </form>
 </div>
 
-<div class="card">
-    <h2><i class="fas fa-list-ul"></i> Listado de Acciones Específicas</h2>
-    
-    <div id="contenedorTablaAccionEspec">
-        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-            <i class="fas fa-spinner fa-spin"></i> Cargando tabla...
-        </div>
-    </div>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-table"></i> Catálogo de Acciones Específicas
+    </h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px; width: 60px;">ID</th>
+                <th style="padding: 12px;">Abreviatura</th>
+                <th style="padding: 12px;">Acción Específica</th>
+                <th style="padding: 12px;">Código A.E.</th>
+                <th style="padding: 12px; text-align: center; width: 150px;">Opciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyAccionesEspec"></tbody>
+    </table>
 </div>
 
 <script>
-    async function inicializarModulo(vistaID) {
+    window.inicializarModulo = function(vistaID) {
         if (vistaID !== 'accion_especifica') return;
 
-        cargarTablaAccionEspec();
-
         const form = document.getElementById('formAccionEspec');
-        
-        // Prevención de eventos duplicados en SPA
         const nuevoForm = form.cloneNode(true);
         form.parentNode.replaceChild(nuevoForm, form);
 
+        cargarTablaAE();
+
         nuevoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnGuardar = document.getElementById('btnGuardarAE');
+            btnGuardar.disabled = true;
 
-            const datos = FormManager.validateAndGetData('formAccionEspec');
+            const idEdit = document.getElementById('edit_id_ae').value;
+            const datos = {
+                NOMBRE_ABREVIADO: document.getElementById('NOMBRE_ABREVIADO').value,
+                ACCION_ESPECIFICA: document.getElementById('ACCION_ESPECIFICA').value,
+                CODIGO_A_E: document.getElementById('CODIGO_A_E').value
+            };
             
-            if (datos) {
-                const idEdicion = document.getElementById('ID_AE').value;
-                const metodo = idEdicion ? 'PUT' : 'POST';
-                // Asumimos que la ruta en el backend será /api/accion_especifica
-                const endpoint = idEdicion ? `/accion_especifica/${idEdicion}` : '/accion_especifica';
+            const endpoint = idEdit ? `${Endpoints.ACCION_ESPECIFICA}/${idEdit}` : Endpoints.ACCION_ESPECIFICA;
+            const metodo = idEdit ? 'PUT' : 'POST';
 
-                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
-                
-                if (respuesta) {
-                    App.mostrarAlerta(idEdicion ? 'Registro actualizado correctamente' : 'Registro creado con éxito');
-                    limpiarFormularioAE();
-                    cargarTablaAccionEspec(); 
-                }
+            const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+
+            if (respuesta) {
+                App.mostrarAlerta(idEdit ? 'Actualizado correctamente' : 'Guardado correctamente', 'success');
+                cancelarEdicionAE();
+                cargarTablaAE();
             }
+
+            btnGuardar.disabled = false;
         });
     }
 
-    async function cargarTablaAccionEspec() {
-        const datos = await App.peticionAPI('/accion_especifica'); 
+    async function cargarTablaAE() {
+        const tbody = document.getElementById('tbodyAccionesEspec');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;"><i class="fas fa-sync fa-spin"></i> Cargando datos...</td></tr>';
+
+        const datos = await App.peticionAPI(Endpoints.ACCION_ESPECIFICA, 'GET');
         
-        if (datos) {
-            const tabla = new DataTable({
-                containerId: 'contenedorTablaAccionEspec',
-                data: datos,
-                columns: [
-                    { key: 'ID_AE', label: 'ID' },
-                    { key: 'ACCION_ESPECIFICA', label: 'Acción Específica' }
-                ],
-                actions: {
-                    idKey: 'ID_AE',
-                    edit: (registro) => {
-                        FormManager.fillForm('formAccionEspec', registro);
-                        document.getElementById('btnGuardarAccionEspec').innerHTML = '<i class="fas fa-sync"></i> Actualizar Registro';
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        App.mostrarAlerta('Modifica el texto y presiona Actualizar', 'info');
-                    },
-                    delete: async (id) => {
-                        if (confirm('⚠️ ¿Estás seguro de eliminar esta Acción Específica?')) {
-                            const res = await App.peticionAPI(`/accion_especifica/${id}`, 'DELETE');
-                            if (res) {
-                                App.mostrarAlerta('Registro eliminado exitosamente');
-                                cargarTablaAccionEspec();
-                            }
-                        }
-                    }
-                }
-            });
-            tabla.render();
+        if (!datos || datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No hay registros en el catálogo</td></tr>';
+            return;
         }
+
+        tbody.innerHTML = datos.map(d => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding:12px;"><strong>${d.ID_AE}</strong></td>
+                <td style="padding:12px;"><span style="background: #e9ecef; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem; font-weight:600;">${d.NOMBRE_ABREVIADO}</span></td>
+                <td style="padding:12px;">${d.ACCION_ESPECIFICA}</td>
+                <td style="padding:12px;">${d.CODIGO_A_E}</td>
+                <td style="padding:12px; text-align:center; display:flex; gap:10px; justify-content:center;">
+                    <button onclick="prepararEdicionAE(${d.ID_AE}, '${d.NOMBRE_ABREVIADO}', '${d.ACCION_ESPECIFICA}', '${d.CODIGO_A_E}')" style="background:#ffc107; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarAE(${d.ID_AE})" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    function limpiarFormularioAE() {
-        FormManager.resetForm('formAccionEspec');
-        document.getElementById('ID_AE').value = '';
-        document.getElementById('btnGuardarAccionEspec').innerHTML = '<i class="fas fa-save"></i> Guardar Registro';
+    window.prepararEdicionAE = function(id, abrev, accion, codigo) {
+        document.getElementById('edit_id_ae').value = id;
+        document.getElementById('NOMBRE_ABREVIADO').value = abrev;
+        document.getElementById('ACCION_ESPECIFICA').value = accion;
+        document.getElementById('CODIGO_A_E').value = codigo;
+        
+        document.getElementById('form-title-ae').innerText = 'Editando Registro';
+        document.getElementById('btn-text-ae').innerText = 'Actualizar Datos';
+        document.getElementById('btnCancelarEditAE').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.cancelarEdicionAE = function() {
+        document.getElementById('edit_id_ae').value = '';
+        document.getElementById('formAccionEspec').reset();
+        document.getElementById('form-title-ae').innerText = 'Nueva Acción Específica';
+        document.getElementById('btn-text-ae').innerText = 'Guardar Registro';
+        document.getElementById('btnCancelarEditAE').style.display = 'none';
+    }
+
+    window.eliminarAE = async function(id) {
+        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+        
+        const respuesta = await App.peticionAPI(`${Endpoints.ACCION_ESPECIFICA}/${id}`, 'DELETE');
+        if (respuesta) {
+            App.mostrarAlerta('Eliminado con éxito', 'success');
+            cargarTablaAE();
+        }
     }
 </script>

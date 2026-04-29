@@ -1,59 +1,58 @@
-/**
- * ============================================================================
- * ARCHIVO PRINCIPAL DEL SERVIDOR (Entry Point)
- * Archivo: backend/server.js
- * ============================================================================
- */
-
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// 1. Inicializar la aplicación Express
 const app = express();
 
-// 2. Middlewares Globales (Configuraciones base)
-// CORS permite que el frontend (interfaz) se comunique con el backend (API) sin bloqueos de seguridad
-app.use(cors()); 
-// Habilita al servidor para entender y procesar información enviada en formato JSON
-app.use(express.json()); 
+// 1. Middlewares
+app.use(cors());
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 3. Servir el Frontend Estático
-// Esto conecta la carpeta 'frontend' para que Node.js la muestre automáticamente
+// 2. Archivos estáticos
 app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/public', express.static(path.join(__dirname, '../frontend/public')));
+app.use('/src', express.static(path.join(__dirname, '../frontend/src')));
 
-// 4. Importar los Enrutadores (Nuestras rutas API)
-const registroRoutes = require('./routes/registro.routes');
+// 3. Rutas (Importaciones)
 const accionRoutes = require('./routes/accion.routes');
 const zonaRoutes = require('./routes/zona.routes');
 const recursoRoutes = require('./routes/recurso.routes');
+const accionEspecRoutes = require('./routes/accionEspec.routes');
+const subaccionRoutes = require('./routes/subaccion.routes');
+const actividadRoutes = require('./routes/actividad.routes');
+// 👉 ¡AQUÍ ESTÁ LA LÍNEA QUE FALTABA!
+const registroRoutes = require('./routes/registro.routes');
 
-// 5. Montar las Rutas en la API (Definir las URLs base)
-app.use('/api/detalle_registro', registroRoutes);
+
+// 4. Endpoints (Conexión de rutas)
 app.use('/api/accion', accionRoutes);
 app.use('/api/zona', zonaRoutes);
 app.use('/api/recurso', recursoRoutes);
+app.use('/api/accion_especifica', accionEspecRoutes);
+app.use('/api/subaccion', subaccionRoutes);
+app.use('/api/actividad', actividadRoutes);
+// 👉 ¡Y AQUÍ ESTÁ LA SEGUNDA LÍNEA QUE FALTABA!
+app.use('/api/detalle_registro', registroRoutes);
 
-// 6. Manejo de la ruta principal (Redirigir a la interfaz visual)
+
+// 5. Raíz
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// 7. Middleware para Rutas No Encontradas (Error 404 en la API)
-app.use((req, res) => {
-    res.status(404).json({ error: 'Ruta no encontrada en la API de SAE.' });
+// 6. 404 API
+app.use('/api', (req, res) => {
+    res.status(404).json({ error: 'Ruta API no encontrada' });
 });
 
-// 8. Encender el Servidor
+// 7. Servidor
 const PORT = process.env.PORT || 3000;
+const URL = `http://localhost:${PORT}`;
 
 app.listen(PORT, () => {
-    console.log(`\n=============================================================`);
-    console.log(`🚀 SISTEMA SAE - SERVIDOR ARRANCADO CON ÉXITO`);
-    console.log(`=============================================================`);
-    console.log(`🌐 Interfaz Web (Frontend): http://localhost:${PORT}`);
-    console.log(`🔌 Endpoints API (Backend): http://localhost:${PORT}/api`);
-    console.log(`=============================================================\n`);
-    console.log(`Esperando conexiones... (Presiona CTRL+C para detener)`);
+    console.log(`\n=========================================`);
+    console.log(`🚀 SERVIDOR INICIADO`);
+    console.log(`👉 ${URL}`);
+    console.log(`=========================================\n`);
 });

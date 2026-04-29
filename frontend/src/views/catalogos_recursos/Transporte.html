@@ -1,119 +1,116 @@
-<div class="card">
-    <h2><i class="fas fa-car"></i> Gestión de Medios de Transporte</h2>
-    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
-        Administra los tipos de movilidad utilizados por los agentes para las actividades de supervisión.
-    </p>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; border-top: 4px solid #6610f2;">
+    <h2 style="color: #6610f2; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-truck"></i> <span id="form-title-tt">Nuevo Tipo de Transporte</span>
+    </h2>
     
-    <form id="formTransporte">
-        <input type="hidden" id="id_tt"> 
-
-        <div class="form-grid">
-            <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label">Descripción del Transporte <span style="color: var(--status-error);">*</span></label>
-                <input type="text" id="NOMBRE_TRANSPORTE" class="form-control" placeholder="Ej: Camioneta 4x4, Motocicleta, Furgoneta, etc." required>
-            </div>
+    <form id="formTransporte" style="margin-top: 20px;">
+        <input type="hidden" id="edit_id_tt" value="">
+        
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: 600; font-size: 0.9rem;">Nombre del Transporte <span style="color: red;">*</span></label>
+            <input type="text" id="NOMBRE_TRANSPORTE" required style="width: 100%; max-width: 450px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px; display: block;" placeholder="Ej: Camioneta 4x4">
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="submit" class="btn btn-primary" id="btnGuardarTransporte">
-                <i class="fas fa-save"></i> Guardar Transporte
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button type="submit" id="btnGuardarTT" style="background: #6610f2; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> <span id="btn-text-tt">Guardar Registro</span>
             </button>
-            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormTransporte()">
-                <i class="fas fa-brush"></i> Limpiar
+            <button type="button" onclick="cancelarEdicionTT()" id="btnCancelarEditTT" style="display: none; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Cancelar
             </button>
         </div>
     </form>
 </div>
 
-<div class="card">
-    <h2><i class="fas fa-bus-alt"></i> Transportes Registrados</h2>
-    
-    <div id="contenedorTablaTransporte">
-        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-            <i class="fas fa-sync fa-spin"></i> Cargando catálogo de movilidad...
-        </div>
-    </div>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0;"><i class="fas fa-list"></i> Transportes Registrados</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px; width: 80px;">ID</th>
+                <th style="padding: 12px;">Descripción del Transporte</th>
+                <th style="padding: 12px; text-align: center; width: 150px;">Opciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyTransportes"></tbody>
+    </table>
 </div>
 
 <script>
-    /**
-     * Inicialización llamada por el Router
-     */
-    async function inicializarModulo(vistaID) {
-        // Nota: Asegúrate de que en sidebar.js el ID 'tipo_transporte' apunte a este archivo
-        cargarTablaTransportes();
+    window.inicializarModulo = function(vistaID) {
+        if (vistaID !== 'tipo_transporte') return;
 
         const form = document.getElementById('formTransporte');
-        
-        // Limpieza de eventos para navegación SPA profesional
         const nuevoForm = form.cloneNode(true);
         form.parentNode.replaceChild(nuevoForm, form);
 
+        cargarTablaTransportes();
+
         nuevoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            // Usamos nuestra clase FormManager para validar
-            const datos = FormManager.validateAndGetData('formTransporte');
+            const idEdit = document.getElementById('edit_id_tt').value;
+            const nombre = document.getElementById('NOMBRE_TRANSPORTE').value;
             
-            if (datos) {
-                const idEdicion = document.getElementById('id_tt').value;
-                const metodo = idEdicion ? 'PUT' : 'POST';
-                // La ruta base en nuestro controlador es /api/recurso/transporte
-                const endpoint = idEdicion ? `/recurso/transporte/${idEdicion}` : '/recurso/transporte';
+            const endpoint = idEdit ? `${Endpoints.RECURSO.TRANSPORTE}/${idEdit}` : Endpoints.RECURSO.TRANSPORTE;
+            const metodo = idEdit ? 'PUT' : 'POST';
 
-                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
-                
-                if (respuesta) {
-                    App.mostrarAlerta(idEdicion ? 'Transporte actualizado' : 'Transporte registrado con éxito');
-                    limpiarFormTransporte();
-                    cargarTablaTransportes(); 
-                }
+            const respuesta = await App.peticionAPI(endpoint, metodo, { NOMBRE_TRANSPORTE: nombre });
+
+            if (respuesta) {
+                App.mostrarAlerta(idEdit ? 'Transporte actualizado' : 'Transporte registrado', 'success');
+                cancelarEdicionTT();
+                cargarTablaTransportes();
             }
         });
     }
 
-    /**
-     * Carga y renderizado de la tabla
-     */
     async function cargarTablaTransportes() {
-        const datos = await App.peticionAPI('/recurso/transporte'); 
-        
-        if (datos) {
-            const tabla = new DataTable({
-                containerId: 'contenedorTablaTransporte',
-                data: datos,
-                columns: [
-                    { key: 'id_tt', label: 'ID' },
-                    { key: 'NOMBRE_TRANSPORTE', label: 'Medio de Transporte' }
-                ],
-                actions: {
-                    idKey: 'id_tt',
-                    edit: (registro) => {
-                        FormManager.fillForm('formTransporte', registro);
-                        document.getElementById('btnGuardarTransporte').innerHTML = '<i class="fas fa-sync"></i> Actualizar Transporte';
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    },
-                    delete: async (id) => {
-                        if (confirm('¿Estás seguro de eliminar este transporte?')) {
-                            const res = await App.peticionAPI(`/recurso/transporte/${id}`, 'DELETE');
-                            if (res) {
-                                App.mostrarAlerta('Transporte eliminado');
-                                cargarTablaTransportes();
-                            }
-                        }
-                    }
-                }
-            });
-            tabla.render();
-        }
+        const tbody = document.getElementById('tbodyTransportes');
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><i class="fas fa-sync fa-spin"></i></td></tr>';
+
+        const datos = await App.peticionAPI(Endpoints.RECURSO.TRANSPORTE);
+        if (!datos) return;
+
+        tbody.innerHTML = datos.map(t => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding:12px;">${t.id_tt}</td>
+                <td style="padding:12px; font-weight:500;">${t.NOMBRE_TRANSPORTE}</td>
+                <td style="padding:12px; text-align:center; display:flex; gap:10px; justify-content:center;">
+                    <button onclick="prepararEdicionTT(${t.id_tt}, '${t.NOMBRE_TRANSPORTE}')" style="background:#ffc107; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarTransporte(${t.id_tt})" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('') || '<tr><td colspan="3" style="text-align:center; padding:20px;">Sin registros</td></tr>';
     }
 
-    /**
-     * Resetea el formulario al estado original
-     */
-    function limpiarFormTransporte() {
-        FormManager.resetForm('formTransporte');
-        document.getElementById('id_tt').value = '';
-        document.getElementById('btnGuardarTransporte').innerHTML = '<i class="fas fa-save"></i> Guardar Transporte';
+    window.prepararEdicionTT = function(id, nombre) {
+        document.getElementById('edit_id_tt').value = id;
+        document.getElementById('NOMBRE_TRANSPORTE').value = nombre;
+        document.getElementById('form-title-tt').innerText = 'Editando Transporte';
+        document.getElementById('btn-text-tt').innerText = 'Actualizar Datos';
+        document.getElementById('btnCancelarEditTT').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.cancelarEdicionTT = function() {
+        document.getElementById('edit_id_tt').value = '';
+        document.getElementById('formTransporte').reset();
+        document.getElementById('form-title-tt').innerText = 'Nuevo Tipo de Transporte';
+        document.getElementById('btn-text-tt').innerText = 'Guardar Registro';
+        document.getElementById('btnCancelarEditTT').style.display = 'none';
+    }
+
+    window.eliminarTransporte = async function(id) {
+        if (!confirm('¿Seguro que deseas eliminar este tipo de transporte?')) return;
+        
+        const respuesta = await App.peticionAPI(`${Endpoints.RECURSO.TRANSPORTE}/${id}`, 'DELETE');
+        if (respuesta) {
+            App.mostrarAlerta('Eliminado con éxito', 'success');
+            cargarTablaTransportes();
+        }
     }
 </script>

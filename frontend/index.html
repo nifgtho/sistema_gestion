@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema SAE </title>
+    <title>Sistema SAE - Dashboard</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,58 +18,78 @@
         
         <aside class="sidebar" id="main-sidebar">
             <div class="sidebar-header">
-                <i class="fas fa-hospital-symbol fa-lg"></i>
-                <span style="margin-left: 10px; font-weight: 700;">SISTEMA SAE</span>
+                <i class="fas fa-notes-medical fa-lg" style="color: white;"></i>
+                <span class="sidebar-title">SISTEMA SAE</span>
             </div>
             
             <nav class="sidebar-menu">
                 <div class="menu-item active" onclick="cargarVista('dashboard')">
-                    <i class="fas fa-home"></i> <span>Dashboard</span>
+                    <i class="fas fa-home menu-icon"></i> <span>Dashboard</span>
                 </div>
-                
                 <div class="menu-item" onclick="cargarVista('detalle_registro')">
-                    <i class="fas fa-file-medical"></i> <span>Registro Central</span>
+                    <i class="fas fa-file-medical menu-icon"></i> <span>Registro Central</span>
                 </div>
 
-                <div class="menu-header" style="padding: 20px 20px 10px; font-size: 0.7rem; color: #7f8c8d; font-weight: 700; text-transform: uppercase;">Catálogos</div>
-
+                <div class="menu-header">Catálogos Operativos</div>
+                
                 <div class="menu-item" onclick="cargarVista('accion')">
-                    <i class="fas fa-tasks"></i> <span>Acciones</span>
+                    <i class="fas fa-tasks menu-icon"></i> <span>Acciones</span>
                 </div>
-                
                 <div class="menu-item" onclick="cargarVista('accion_especifica')">
-                    <i class="fas fa-crosshairs"></i> <span>Acciones Espec.</span>
+                    <i class="fas fa-crosshairs menu-icon"></i> <span>Acciones Espec.</span>
                 </div>
-                
                 <div class="menu-item" onclick="cargarVista('subaccion')">
-                    <i class="fas fa-layer-group"></i> <span>Subacciones</span>
+                    <i class="fas fa-layer-group menu-icon"></i> <span>Subacciones</span>
+                </div>
+                <div class="menu-item" onclick="cargarVista('actividad')">
+                    <i class="fas fa-clipboard-list menu-icon"></i> <span>Actividades</span>
+                </div>
+
+                <div class="menu-header">Catálogos de Entorno</div>
+                
+                <div class="menu-item" onclick="cargarVista('zona_provincia')">
+                    <i class="fas fa-map menu-icon"></i> <span>Provincias</span>
+                </div>
+                <div class="menu-item" onclick="cargarVista('zona_distrito')">
+                    <i class="fas fa-map-pin menu-icon"></i> <span>Distritos</span>
+                </div>
+
+                <div class="menu-header">Catálogos de Recursos</div>
+                
+                <div class="menu-item" onclick="cargarVista('tipo_agente')">
+                    <i class="fas fa-user-tie menu-icon"></i> <span>Tipos de Agente</span>
+                </div>
+                <div class="menu-item" onclick="cargarVista('tipo_transporte')">
+                    <i class="fas fa-truck menu-icon"></i> <span>Tipos de Transporte</span>
                 </div>
             </nav>
         </aside>
 
         <main class="main-content">
             
-            <header class="top-header">
+            <header class="app-header">
                 <div class="header-left">
-                    <button id="toggle-sidebar" class="btn-icon" style="background: none; border: none; cursor: pointer; font-size: 1.2rem;">
+                    <button id="toggle-sidebar" class="hamburger-btn">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h1 id="view-title" style="margin-left: 20px; font-size: 1.2rem; color: #2c3e50;">Panel Principal</h1>
+                    <h1 id="view-title" class="header-title">Panel Principal</h1>
                 </div>
                 
-                <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
-                    <div style="text-align: right;">
-                        <div style="font-weight: 600; font-size: 0.9rem;">Pedro Jesus</div>
-                        <div style="font-size: 0.75rem; color: #7f8c8d;">Ingeniero de Software</div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="user-name-wrapper">
+                            <span class="user-db">DB</span>
+                        </div>
+                        <span class="user-title">Ing de Software</span>
                     </div>
-                    <img src="https://ui-avatars.com/api/?name=Pedro+Jesus&background=0056b3&color=fff" alt="User" style="width: 40px; border-radius: 50%;">
+                    <img src="https://ui-avatars.com/api/?name=Pedro+Jesus&background=0056b3&color=fff" alt="User" class="user-avatar" style="padding: 0; border: none;">
                 </div>
             </header>
 
             <section id="content-area">
-                <div class="loader-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-                    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: #0056b3;"></i>
-                    <p style="margin-top: 20px; font-weight: 500;">Iniciando módulos...</p>
+                <div class="loader-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
+                    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--accent-active);"></i>
+                    <p style="margin-top: 20px; font-weight: 500;">Iniciando módulos SAE...</p>
                 </div>
             </section>
 
@@ -83,21 +103,21 @@
     <script src="/src/components/sidebar.js"></script>
 
     <script>
-        // Inicialización del sistema sin recargas de página
+        // Inicialización del sistema
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("✅ Sistema SAE iniciado correctamente.");
+            console.log("✅ Sistema SAE iniciado con nueva interfaz profesional.");
             
-            // Un pequeño delay para que el navegador registre todos los scripts
+            // Retraso ligero para renderizado suave
             setTimeout(() => {
                 if (typeof cargarVista === 'function') {
                     cargarVista('dashboard'); 
                 } else {
-                    console.error("❌ Error: No se pudo encontrar la función cargarVista en sidebar.js");
+                    console.error("❌ Error: No se encontró cargarVista en sidebar.js");
                 }
             }, 200);
         });
 
-        // Soporte para menú móvil
+        // Toggle del menú móvil
         document.getElementById('toggle-sidebar').addEventListener('click', () => {
             const sidebar = document.getElementById('main-sidebar');
             sidebar.classList.toggle('active');

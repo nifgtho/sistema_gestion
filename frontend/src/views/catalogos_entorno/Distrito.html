@@ -1,138 +1,188 @@
-<div class="card">
-    <h2><i class="fas fa-map-marked"></i> Gestión de Distritos</h2>
-    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
-        Asocia distritos a las provincias registradas para definir las zonas de operación.
-    </p>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; border-top: 4px solid #17a2b8;">
+    <h2 style="color: #17a2b8; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-map-pin"></i> <span id="form-title-distrito">Nuevo Distrito</span>
+    </h2>
     
-    <form id="formDistrito">
-        <input type="hidden" id="id_zd"> 
-
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Provincia Perteneciente <span style="color: var(--status-error);">*</span></label>
-                <select id="id_zp" class="form-control" required>
+    <form id="formDistrito" style="margin-top: 20px;">
+        <input type="hidden" id="edit_id_zd" value="">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 600px;">
+            
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem; color: #2c3e50;">Provincia a la que pertenece <span style="color: red;">*</span></label>
+                <select id="id_zp_select" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px; background-color: #fff;">
                     <option value="">Cargando provincias...</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Nombre del Distrito <span style="color: var(--status-error);">*</span></label>
-                <input type="text" id="NOMBRE_DISTRITO" class="form-control" placeholder="Ej: Amarilis, Pillco Marca..." required>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem; color: #2c3e50;">Nombre del Distrito <span style="color: red;">*</span></label>
+                <input type="text" id="NOMBRE_DISTRITO" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: Amarilis">
             </div>
+
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="submit" class="btn btn-primary" id="btnGuardarDistrito">
-                <i class="fas fa-save"></i> Guardar Distrito
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button type="submit" id="btnGuardarDistrito" style="background: #17a2b8; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> <span id="btn-text-distrito">Guardar Distrito</span>
             </button>
-            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormDistrito()">
-                <i class="fas fa-undo"></i> Cancelar
+            <button type="button" onclick="cancelarEdicionDistrito()" id="btnCancelarEditDistrito" style="display: none; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Cancelar
             </button>
         </div>
     </form>
 </div>
 
-<div class="card">
-    <h2><i class="fas fa-city"></i> Listado de Distritos</h2>
-    
-    <div id="contenedorTablaDistrito">
-        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-            <i class="fas fa-spinner fa-spin"></i> Sincronizando con el servidor...
-        </div>
-    </div>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-table"></i> Distritos en Sistema
+    </h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px; width: 80px;">ID</th>
+                <th style="padding: 12px;">Distrito</th>
+                <th style="padding: 12px;">Provincia Asociada</th>
+                <th style="padding: 12px; text-align: center; width: 150px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyDistritos"></tbody>
+    </table>
 </div>
 
 <script>
-    async function inicializarModulo(vistaID) {
-        // En sidebar.js este archivo suele mapearse con el ID 'distrito' o dentro de 'zona'
-        // Ajustamos la lógica para que coincida con tu Router
-        
-        // 1. Cargamos las provincias para el Select y luego la tabla
-        await cargarProvinciasSelect();
-        cargarTablaDistritos();
+    /**
+     * INICIALIZADOR DEL MÓDULO DISTRITOS
+     */
+    window.inicializarModulo = async function(vistaID) {
+        if (vistaID !== 'zona_distrito') return;
 
+        // 1. Limpiar eventos clonando el formulario
         const form = document.getElementById('formDistrito');
         const nuevoForm = form.cloneNode(true);
         form.parentNode.replaceChild(nuevoForm, form);
 
+        // 2. Cargar datos iniciales
+        await cargarComboProvincias();
+        cargarTablaDistritos();
+
+        // 3. Evento de envío del formulario
         nuevoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const datos = FormManager.validateAndGetData('formDistrito');
             
-            if (datos) {
-                const idEdicion = document.getElementById('id_zd').value;
-                const metodo = idEdicion ? 'PUT' : 'POST';
-                const endpoint = idEdicion ? `/zona/distrito/${idEdicion}` : '/zona/distrito';
+            const btnGuardar = document.getElementById('btnGuardarDistrito');
+            btnGuardar.disabled = true;
 
-                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
-                
-                if (respuesta) {
-                    App.mostrarAlerta(idEdicion ? 'Distrito actualizado' : 'Distrito registrado correctamente');
-                    limpiarFormDistrito();
-                    cargarTablaDistritos(); 
-                }
+            const idEdit = document.getElementById('edit_id_zd').value;
+            const datos = {
+                id_zp: document.getElementById('id_zp_select').value,
+                NOMBRE_DISTRITO: document.getElementById('NOMBRE_DISTRITO').value
+            };
+            
+            const endpoint = idEdit ? `${Endpoints.ZONA.DISTRITO}/${idEdit}` : Endpoints.ZONA.DISTRITO;
+            const metodo = idEdit ? 'PUT' : 'POST';
+
+            const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+
+            if (respuesta) {
+                App.mostrarAlerta(idEdit ? 'Actualizado correctamente' : 'Guardado correctamente', 'success');
+                cancelarEdicionDistrito();
+                cargarTablaDistritos();
             }
+
+            btnGuardar.disabled = false;
         });
     }
 
     /**
-     * Llena el menú desplegable con las provincias existentes
+     * Función para llenar el <select> con las provincias de db_darwin
      */
-    async function cargarProvinciasSelect() {
-        const provincias = await App.peticionAPI('/zona/provincia');
-        const select = document.getElementById('id_zp');
+    async function cargarComboProvincias() {
+        const select = document.getElementById('id_zp_select');
+        const provincias = await App.peticionAPI(Endpoints.ZONA.PROVINCIA, 'GET');
         
-        if (provincias && select) {
-            let html = '<option value="">-- Seleccione una Provincia --</option>';
-            provincias.forEach(p => {
-                html += `<option value="${p.id_zp}">${p.NOMBRE_PROVINCIA}</option>`;
-            });
-            select.innerHTML = html;
+        if (!provincias || provincias.length === 0) {
+            select.innerHTML = '<option value="">⚠️ Registra una provincia primero</option>';
+            return;
         }
+
+        let opciones = '<option value="" disabled selected>-- Selecciona una Provincia --</option>';
+        provincias.forEach(prov => {
+            opciones += `<option value="${prov.id_zp}">${prov.NOMBRE_PROVINCIA}</option>`;
+        });
+        select.innerHTML = opciones;
     }
 
     /**
-     * Carga la tabla. Fíjate que el controlador que hicimos usa LEFT JOIN
-     * así que aquí mostraremos el nombre de la provincia, no el ID.
+     * Función para cargar la tabla con los distritos y sus provincias (LEFT JOIN)
      */
     async function cargarTablaDistritos() {
-        const datos = await App.peticionAPI('/zona/distrito'); 
+        const tbody = document.getElementById('tbodyDistritos');
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;"><i class="fas fa-sync fa-spin"></i> Cargando datos...</td></tr>';
+
+        const datos = await App.peticionAPI(Endpoints.ZONA.DISTRITO, 'GET');
         
-        if (datos) {
-            const tabla = new DataTable({
-                containerId: 'contenedorTablaDistrito',
-                data: datos,
-                columns: [
-                    { key: 'id_zd', label: 'ID' },
-                    { key: 'NOMBRE_DISTRITO', label: 'Distrito' },
-                    { key: 'NOMBRE_PROVINCIA', label: 'Provincia' } // Dato traído por el JOIN del Backend
-                ],
-                actions: {
-                    idKey: 'id_zd',
-                    edit: (registro) => {
-                        FormManager.fillForm('formDistrito', registro);
-                        document.getElementById('btnGuardarDistrito').innerHTML = '<i class="fas fa-sync"></i> Actualizar Distrito';
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    },
-                    delete: async (id) => {
-                        if (confirm('¿Seguro que deseas eliminar este distrito?')) {
-                            const res = await App.peticionAPI(`/zona/distrito/${id}`, 'DELETE');
-                            if (res) {
-                                App.mostrarAlerta('Distrito eliminado');
-                                cargarTablaDistritos();
-                            }
-                        }
-                    }
-                }
-            });
-            tabla.render();
+        if (!datos || datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No hay distritos registrados</td></tr>';
+            return;
         }
+
+        tbody.innerHTML = datos.map(d => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding:12px;">${d.id_zd}</td>
+                <td style="padding:12px; font-weight:bold; color:#2c3e50;">${d.NOMBRE_DISTRITO}</td>
+                <td style="padding:12px;">
+                    <span style="background: #e2e3e5; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">
+                        <i class="fas fa-map-marker-alt" style="color: #6c757d; margin-right: 5px;"></i> ${d.NOMBRE_PROVINCIA || 'Sin Provincia'}
+                    </span>
+                </td>
+                <td style="padding:12px; text-align:center; display:flex; gap:10px; justify-content:center;">
+                    <button onclick="prepararEdicionDistrito(${d.id_zd}, '${d.NOMBRE_DISTRITO}', ${d.id_zp})" style="background:#ffc107; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarDistrito(${d.id_zd})" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    function limpiarFormDistrito() {
-        FormManager.resetForm('formDistrito');
-        document.getElementById('id_zd').value = '';
-        document.getElementById('btnGuardarDistrito').innerHTML = '<i class="fas fa-save"></i> Guardar Distrito';
+    /**
+     * Lógica visual para cambiar el formulario a modo "Edición"
+     */
+    window.prepararEdicionDistrito = function(id_zd, nombre_distrito, id_zp) {
+        document.getElementById('edit_id_zd').value = id_zd;
+        document.getElementById('NOMBRE_DISTRITO').value = nombre_distrito;
+        document.getElementById('id_zp_select').value = id_zp; // Selecciona automáticamente la provincia
+        
+        document.getElementById('form-title-distrito').innerText = 'Editando Distrito';
+        document.getElementById('btn-text-distrito').innerText = 'Actualizar Datos';
+        document.getElementById('btnCancelarEditDistrito').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * Regresa el formulario a modo "Nuevo Registro"
+     */
+    window.cancelarEdicionDistrito = function() {
+        document.getElementById('edit_id_zd').value = '';
+        document.getElementById('formDistrito').reset();
+        document.getElementById('form-title-distrito').innerText = 'Nuevo Distrito';
+        document.getElementById('btn-text-distrito').innerText = 'Guardar Distrito';
+        document.getElementById('btnCancelarEditDistrito').style.display = 'none';
+    }
+
+    /**
+     * Elimina el registro pidiendo confirmación primero
+     */
+    window.eliminarDistrito = async function(id_zd) {
+        if (!confirm('¿Estás seguro de eliminar este distrito de la base de datos?')) return;
+        
+        const respuesta = await App.peticionAPI(`${Endpoints.ZONA.DISTRITO}/${id_zd}`, 'DELETE');
+        if (respuesta) {
+            App.mostrarAlerta('Distrito eliminado con éxito', 'success');
+            cargarTablaDistritos();
+        }
     }
 </script>

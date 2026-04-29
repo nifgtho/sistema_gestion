@@ -1,114 +1,118 @@
-<div class="card">
-    <h2><i class="fas fa-map-marker-alt"></i> Gestión de Provincias</h2>
-    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
-        Registra las provincias que conforman las zonas de supervisión para el despliegue SAE.
-    </p>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; border-top: 4px solid #17a2b8;">
+    <h2 style="color: #17a2b8; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-map"></i> <span id="form-title">Nueva Provincia</span>
+    </h2>
     
-    <form id="formProvincia">
-        <input type="hidden" id="id_zp"> 
-
-        <div class="form-grid">
-            <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label">Nombre de la Provincia <span style="color: var(--status-error);">*</span></label>
-                <input type="text" id="NOMBRE_PROVINCIA" class="form-control" placeholder="Ej: Huánuco, Leoncio Prado, etc." required>
-            </div>
+    <form id="formProvincia" style="margin-top: 20px;">
+        <input type="hidden" id="edit_id_zp" value="">
+        
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: 600; font-size: 0.9rem;">Nombre de la Provincia <span style="color: red;">*</span></label>
+            <input type="text" id="NOMBRE_PROVINCIA" required style="width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px; display: block;" placeholder="Ej: Huánuco">
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="submit" class="btn btn-primary" id="btnGuardarProvincia">
-                <i class="fas fa-save"></i> Guardar Provincia
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button type="submit" id="btnGuardarProv" style="background: #17a2b8; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> <span id="btn-text">Guardar Provincia</span>
             </button>
-            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormProvincia()">
-                <i class="fas fa-eraser"></i> Limpiar
+            <button type="button" onclick="cancelarEdicion()" id="btnCancelarEdit" style="display: none; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Cancelar
             </button>
         </div>
     </form>
 </div>
 
-<div class="card">
-    <h2><i class="fas fa-map-signs"></i> Provincias Registradas</h2>
-    
-    <div id="contenedorTablaProvincia">
-        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-            <i class="fas fa-spinner fa-spin"></i> Consultando base de datos...
-        </div>
-    </div>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-table"></i> Provincias en Sistema
+    </h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px; width: 80px;">ID</th>
+                <th style="padding: 12px;">Nombre de Provincia</th>
+                <th style="padding: 12px; text-align: center; width: 150px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyProvincias"></tbody>
+    </table>
 </div>
 
 <script>
-    /**
-     * Inicialización llamada por el Router
-     */
-    async function inicializarModulo(vistaID) {
-        if (vistaID !== 'zona') return; // En sidebar.js mapeamos 'zona' a este archivo
-
-        cargarTablaProvincias();
+    window.inicializarModulo = function(vistaID) {
+        if (vistaID !== 'zona_provincia') return;
 
         const form = document.getElementById('formProvincia');
         const nuevoForm = form.cloneNode(true);
         form.parentNode.replaceChild(nuevoForm, form);
 
+        cargarTablaProvincias();
+
         nuevoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const datos = FormManager.validateAndGetData('formProvincia');
+            const idEdit = document.getElementById('edit_id_zp').value;
+            const nombre = document.getElementById('NOMBRE_PROVINCIA').value;
             
-            if (datos) {
-                const idEdicion = document.getElementById('id_zp').value;
-                const metodo = idEdicion ? 'PUT' : 'POST';
-                // La ruta base en nuestro controlador es /api/zona/provincia
-                const endpoint = idEdicion ? `/zona/provincia/${idEdicion}` : '/zona/provincia';
+            const endpoint = idEdit ? `${Endpoints.ZONA.PROVINCIA}/${idEdit}` : Endpoints.ZONA.PROVINCIA;
+            const metodo = idEdit ? 'PUT' : 'POST';
 
-                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
-                
-                if (respuesta) {
-                    App.mostrarAlerta(idEdicion ? 'Provincia actualizada' : 'Provincia registrada con éxito');
-                    limpiarFormProvincia();
-                    cargarTablaProvincias(); 
-                }
+            const respuesta = await App.peticionAPI(endpoint, metodo, { NOMBRE_PROVINCIA: nombre });
+
+            if (respuesta) {
+                App.mostrarAlerta(idEdit ? 'Actualizado correctamente' : 'Guardado correctamente', 'success');
+                cancelarEdicion();
+                cargarTablaProvincias();
             }
         });
     }
 
-    /**
-     * Carga y renderizado de la tabla
-     */
     async function cargarTablaProvincias() {
-        const datos = await App.peticionAPI('/zona/provincia'); 
-        
-        if (datos) {
-            const tabla = new DataTable({
-                containerId: 'contenedorTablaProvincia',
-                data: datos,
-                columns: [
-                    { key: 'id_zp', label: 'ID' },
-                    { key: 'NOMBRE_PROVINCIA', label: 'Nombre de la Provincia' }
-                ],
-                actions: {
-                    idKey: 'id_zp',
-                    edit: (registro) => {
-                        FormManager.fillForm('formProvincia', registro);
-                        document.getElementById('btnGuardarProvincia').innerHTML = '<i class="fas fa-sync"></i> Actualizar Provincia';
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    },
-                    delete: async (id) => {
-                        if (confirm('⚠️ ¿Estás seguro de eliminar esta provincia? Si tiene distritos asociados, el sistema bloqueará la acción.')) {
-                            const res = await App.peticionAPI(`/zona/provincia/${id}`, 'DELETE');
-                            if (res) {
-                                App.mostrarAlerta('Provincia eliminada');
-                                cargarTablaProvincias();
-                            }
-                        }
-                    }
-                }
-            });
-            tabla.render();
-        }
+        const tbody = document.getElementById('tbodyProvincias');
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;"><i class="fas fa-sync fa-spin"></i></td></tr>';
+
+        const datos = await App.peticionAPI(Endpoints.ZONA.PROVINCIA);
+        if (!datos) return;
+
+        tbody.innerHTML = datos.map(p => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding:12px;">${p.id_zp}</td>
+                <td style="padding:12px; font-weight:500;">${p.NOMBRE_PROVINCIA}</td>
+                <td style="padding:12px; text-align:center; display:flex; gap:10px; justify-content:center;">
+                    <button onclick="prepararEdicion(${p.id_zp}, '${p.NOMBRE_PROVINCIA}')" style="background:#ffc107; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarProvincia(${p.id_zp})" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('') || '<tr><td colspan="3" style="text-align:center; padding:20px;">No hay registros</td></tr>';
     }
 
-    function limpiarFormProvincia() {
-        FormManager.resetForm('formProvincia');
-        document.getElementById('id_zp').value = '';
-        document.getElementById('btnGuardarProvincia').innerHTML = '<i class="fas fa-save"></i> Guardar Provincia';
+    window.prepararEdicion = function(id, nombre) {
+        document.getElementById('edit_id_zp').value = id;
+        document.getElementById('NOMBRE_PROVINCIA').value = nombre;
+        document.getElementById('form-title').innerText = 'Editando Provincia';
+        document.getElementById('btn-text').innerText = 'Actualizar Datos';
+        document.getElementById('btnCancelarEdit').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.cancelarEdicion = function() {
+        document.getElementById('edit_id_zp').value = '';
+        document.getElementById('formProvincia').reset();
+        document.getElementById('form-title').innerText = 'Nueva Provincia';
+        document.getElementById('btn-text').innerText = 'Guardar Provincia';
+        document.getElementById('btnCancelarEdit').style.display = 'none';
+    }
+
+    window.eliminarProvincia = async function(id) {
+        if (!confirm('¿Estás seguro de eliminar esta provincia?')) return;
+        
+        const respuesta = await App.peticionAPI(`${Endpoints.ZONA.PROVINCIA}/${id}`, 'DELETE');
+        if (respuesta) {
+            App.mostrarAlerta('Eliminado con éxito', 'success');
+            cargarTablaProvincias();
+        }
     }
 </script>

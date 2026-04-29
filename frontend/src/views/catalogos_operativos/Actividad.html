@@ -1,123 +1,174 @@
-<div class="card">
-    <h2><i class="fas fa-running"></i> Gestión de Actividades</h2>
-    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
-        Define las actividades específicas que se ejecutan dentro de los procesos de supervisión SAE.
-    </p>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; border-top: 4px solid #fd7e14;">
+    <h2 style="color: #fd7e14; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-clipboard-list"></i> <span id="form-title-actividad">Nueva Actividad</span>
+    </h2>
     
-    <form id="formActividad">
-        <input type="hidden" id="ID_ACTIVIDAD"> 
+    <form id="formActividad" style="margin-top: 20px;">
+        <input type="hidden" id="edit_id_actividad" value="">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            
+            <div style="grid-column: 1 / -1;">
+                <label style="font-weight: 600; font-size: 0.9rem;">Nombre de la Actividad <span style="color: red;">*</span></label>
+                <input type="text" id="NOMBRE_ACTIVIDAD" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: Capacitación en campo">
+            </div>
 
-        <div class="form-grid">
-            <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label">Nombre de la Actividad <span style="color: var(--status-error);">*</span></label>
-                <input type="text" id="NOMBRE_ACTIVIDAD" class="form-control" placeholder="Ej: Inspección de postes de media tensión" required>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Código de Actividad <span style="color: red;">*</span></label>
+                <input type="text" id="CODIGO_ACTIVIDAD" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: ACT-001">
+            </div>
+
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Tipo de Agente Asignado</label>
+                <select id="ID_TA_SELECT" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
+                    <option value="">Cargando catálogo...</option>
+                </select>
+                <small style="color: #6c757d;">(Opcional)</small>
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="submit" class="btn btn-primary" id="btnGuardarActividad">
-                <i class="fas fa-save"></i> Guardar Actividad
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button type="submit" id="btnGuardarActividad" style="background: #fd7e14; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> <span id="btn-text-actividad">Guardar Registro</span>
             </button>
-            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormularioActividad()">
-                <i class="fas fa-undo"></i> Cancelar
+            <button type="button" onclick="cancelarEdicionActividad()" id="btnCancelarEditActividad" style="display: none; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Cancelar
             </button>
         </div>
     </form>
 </div>
 
-<div class="card">
-    <h2><i class="fas fa-clipboard-list"></i> Catálogo de Actividades</h2>
-    
-    <div id="contenedorTablaActividad">
-        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-            <i class="fas fa-spinner fa-spin"></i> Sincronizando con la base de datos...
-        </div>
-    </div>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-table"></i> Catálogo de Actividades
+    </h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px; width: 60px;">ID</th>
+                <th style="padding: 12px;">Actividad</th>
+                <th style="padding: 12px;">Código</th>
+                <th style="padding: 12px;">Agente Asignado</th>
+                <th style="padding: 12px; text-align: center; width: 120px;">Opciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyActividades"></tbody>
+    </table>
 </div>
 
 <script>
-    /**
-     * Función de inicialización invocada por el Router (sidebar.js)
-     */
-    async function inicializarModulo(vistaID) {
+    window.inicializarModulo = async function(vistaID) {
         if (vistaID !== 'actividad') return;
 
-        // 1. Cargar datos iniciales
-        cargarTablaActividades();
-
-        // 2. Gestionar el formulario de registro/edición
         const form = document.getElementById('formActividad');
-        
-        // Limpieza de listeners para evitar duplicidad en la navegación SPA
         const nuevoForm = form.cloneNode(true);
         form.parentNode.replaceChild(nuevoForm, form);
 
+        // Cargamos el selector de Agentes y la tabla
+        await cargarComboAgentes();
+        cargarTablaActividades();
+
         nuevoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnGuardar = document.getElementById('btnGuardarActividad');
+            btnGuardar.disabled = true;
 
-            // Validación profesional y extracción de datos
-            const datos = FormManager.validateAndGetData('formActividad');
+            const idEdit = document.getElementById('edit_id_actividad').value;
+            const datos = {
+                NOMBRE_ACTIVIDAD: document.getElementById('NOMBRE_ACTIVIDAD').value,
+                CODIGO_ACTIVIDAD: document.getElementById('CODIGO_ACTIVIDAD').value,
+                ID_TA: document.getElementById('ID_TA_SELECT').value || null // Si está vacío manda null
+            };
             
-            if (datos) {
-                const idEdicion = document.getElementById('ID_ACTIVIDAD').value;
-                const metodo = idEdicion ? 'PUT' : 'POST';
-                // Endpoint esperado: /api/actividad
-                const endpoint = idEdicion ? `/actividad/${idEdicion}` : '/actividad';
+            const endpoint = idEdit ? `${Endpoints.ACTIVIDAD}/${idEdit}` : Endpoints.ACTIVIDAD;
+            const metodo = idEdit ? 'PUT' : 'POST';
 
-                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
-                
-                if (respuesta) {
-                    App.mostrarAlerta(idEdicion ? 'Actividad actualizada' : 'Actividad registrada correctamente');
-                    limpiarFormularioActividad();
-                    cargarTablaActividades(); 
-                }
+            const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+
+            if (respuesta) {
+                App.mostrarAlerta(idEdit ? 'Actualizado correctamente' : 'Guardado correctamente', 'success');
+                cancelarEdicionActividad();
+                cargarTablaActividades();
             }
+
+            btnGuardar.disabled = false;
         });
     }
 
-    /**
-     * Obtiene los datos del servidor y renderiza la tabla dinámica
-     */
-    async function cargarTablaActividades() {
-        const datos = await App.peticionAPI('/actividad'); 
+    async function cargarComboAgentes() {
+        const select = document.getElementById('ID_TA_SELECT');
+        const agentes = await App.peticionAPI(Endpoints.RECURSO.AGENTE, 'GET');
         
-        if (datos) {
-            const tabla = new DataTable({
-                containerId: 'contenedorTablaActividad',
-                data: datos,
-                columns: [
-                    { key: 'ID_ACTIVIDAD', label: 'ID' },
-                    { key: 'NOMBRE_ACTIVIDAD', label: 'Nombre de la Actividad' }
-                ],
-                actions: {
-                    idKey: 'ID_ACTIVIDAD',
-                    edit: (registro) => {
-                        FormManager.fillForm('formActividad', registro);
-                        document.getElementById('btnGuardarActividad').innerHTML = '<i class="fas fa-sync"></i> Actualizar Actividad';
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        App.mostrarAlerta('Editando actividad seleccionada', 'info');
-                    },
-                    delete: async (id) => {
-                        if (confirm('¿Confirmas la eliminación de esta actividad? Esta acción no se puede deshacer.')) {
-                            const res = await App.peticionAPI(`/actividad/${id}`, 'DELETE');
-                            if (res) {
-                                App.mostrarAlerta('Actividad eliminada con éxito');
-                                cargarTablaActividades();
-                            }
-                        }
-                    }
-                }
-            });
-            tabla.render();
+        if (!agentes || agentes.length === 0) {
+            select.innerHTML = '<option value="">⚠️ Registra un Tipo de Agente primero (Opcional)</option>';
+            return;
         }
+
+        let opciones = '<option value="" selected>-- Sin Agente Asignado --</option>';
+        agentes.forEach(ag => {
+            opciones += `<option value="${ag.ID_TA}">${ag.NOMBRE_TA}</option>`;
+        });
+        select.innerHTML = opciones;
     }
 
-    /**
-     * Resetea el formulario a su estado original
-     */
-    function limpiarFormularioActividad() {
-        FormManager.resetForm('formActividad');
-        document.getElementById('ID_ACTIVIDAD').value = '';
-        document.getElementById('btnGuardarActividad').innerHTML = '<i class="fas fa-save"></i> Guardar Actividad';
+    async function cargarTablaActividades() {
+        const tbody = document.getElementById('tbodyActividades');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;"><i class="fas fa-sync fa-spin"></i> Cargando...</td></tr>';
+
+        const datos = await App.peticionAPI(Endpoints.ACTIVIDAD, 'GET');
+        
+        if (!datos || datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No hay actividades registradas</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = datos.map(d => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding:12px;"><strong>${d.ID_ACTIVIDAD}</strong></td>
+                <td style="padding:12px; font-weight: 500; color: #fd7e14;">${d.NOMBRE_ACTIVIDAD}</td>
+                <td style="padding:12px;"><span style="background:#e9ecef; padding:3px 8px; border-radius:4px;">${d.CODIGO_ACTIVIDAD}</span></td>
+                <td style="padding:12px;">
+                    ${d.NOMBRE_TA ? `<i class="fas fa-user-tie" style="color: #6c757d; margin-right:5px;"></i> ${d.NOMBRE_TA}` : '<span style="color:#adb5bd;">Ninguno</span>'}
+                </td>
+                <td style="padding:12px; text-align:center; display:flex; gap:10px; justify-content:center;">
+                    <button onclick="prepararEdicionActividad(${d.ID_ACTIVIDAD}, '${d.NOMBRE_ACTIVIDAD}', '${d.CODIGO_ACTIVIDAD}', ${d.ID_TA || 'null'})" style="background:#ffc107; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarActividad(${d.ID_ACTIVIDAD})" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.prepararEdicionActividad = function(id, nombre, codigo, id_ta) {
+        document.getElementById('edit_id_actividad').value = id;
+        document.getElementById('NOMBRE_ACTIVIDAD').value = nombre;
+        document.getElementById('CODIGO_ACTIVIDAD').value = codigo;
+        document.getElementById('ID_TA_SELECT').value = id_ta || '';
+        
+        document.getElementById('form-title-actividad').innerText = 'Editando Actividad';
+        document.getElementById('btn-text-actividad').innerText = 'Actualizar Datos';
+        document.getElementById('btnCancelarEditActividad').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.cancelarEdicionActividad = function() {
+        document.getElementById('edit_id_actividad').value = '';
+        document.getElementById('formActividad').reset();
+        document.getElementById('form-title-actividad').innerText = 'Nueva Actividad';
+        document.getElementById('btn-text-actividad').innerText = 'Guardar Registro';
+        document.getElementById('btnCancelarEditActividad').style.display = 'none';
+    }
+
+    window.eliminarActividad = async function(id) {
+        if (!confirm('¿Estás seguro de eliminar esta actividad?')) return;
+        
+        const respuesta = await App.peticionAPI(`${Endpoints.ACTIVIDAD}/${id}`, 'DELETE');
+        if (respuesta) {
+            App.mostrarAlerta('Eliminado con éxito', 'success');
+            cargarTablaActividades();
+        }
     }
 </script>

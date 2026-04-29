@@ -1,124 +1,190 @@
-<div class="card">
-    <h2><i class="fas fa-layer-group"></i> Gestión de Subacciones</h2>
-    <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: 20px;">
-        Administra el tercer nivel de detalle operativo (Subacciones) para afinar los registros de supervisión.
-    </p>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; border-top: 4px solid #6f42c1;">
+    <h2 style="color: #6f42c1; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-layer-group"></i> <span id="form-title-sa">Nueva Subacción</span>
+    </h2>
     
-    <form id="formSubaccion">
-        <input type="hidden" id="ID_SA"> 
+    <form id="formSubaccion" style="margin-top: 20px;">
+        <input type="hidden" id="edit_id_sa" value="">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            
+            <div style="grid-column: 1 / -1;">
+                <label style="font-weight: 600; font-size: 0.9rem;">Acción Específica Asociada <span style="color: red;">*</span></label>
+                <select id="ID_AE_SELECT" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
+                    <option value="">Cargando catálogo...</option>
+                </select>
+            </div>
 
-        <div class="form-grid">
-            <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label">Descripción de la Subacción <span style="color: var(--status-error);">*</span></label>
-                <input type="text" id="SUB_ACCION_ESP" class="form-control" placeholder="Ej: Calibración de sensores de temperatura" required>
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Nombre Abreviado <span style="color: red;">*</span></label>
+                <input type="text" id="NOMBRE_ABREVIADO" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: CONS-EXT">
+            </div>
+
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Sub Acción Específica <span style="color: red;">*</span></label>
+                <input type="text" id="SUB_ACCION_ESP" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: Consulta Externa Médica">
+            </div>
+
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Concat <span style="color: red;">*</span></label>
+                <input type="text" id="CONCAT" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: ASIST-MED-CONS-EXT">
+            </div>
+
+            <div>
+                <label style="font-weight: 600; font-size: 0.9rem;">Código S.A.E. <span style="color: red;">*</span></label>
+                <input type="text" id="CODIGO_S_A_E" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;" placeholder="Ej: SAE-001">
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="submit" class="btn btn-primary" id="btnGuardarSubaccion">
-                <i class="fas fa-save"></i> Guardar Subacción
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button type="submit" id="btnGuardarSA" style="background: #6f42c1; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> <span id="btn-text-sa">Guardar Registro</span>
             </button>
-            <button type="button" class="btn" style="background-color: #e2e6ea; color: #333;" onclick="limpiarFormularioSA()">
-                <i class="fas fa-times-circle"></i> Cancelar
+            <button type="button" onclick="cancelarEdicionSA()" id="btnCancelarEditSA" style="display: none; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                Cancelar
             </button>
         </div>
     </form>
 </div>
 
-<div class="card">
-    <h2><i class="fas fa-list-alt"></i> Listado de Subacciones</h2>
-    
-    <div id="contenedorTablaSubaccion">
-        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-            <i class="fas fa-spinner fa-spin"></i> Cargando tabla...
-        </div>
-    </div>
+<div class="card" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-table"></i> Catálogo de Subacciones
+    </h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+        <thead>
+            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px; width: 60px;">ID</th>
+                <th style="padding: 12px;">Acción Específica (Padre)</th>
+                <th style="padding: 12px;">Abrev.</th>
+                <th style="padding: 12px;">Subacción</th>
+                <th style="padding: 12px;">Concat / Código</th>
+                <th style="padding: 12px; text-align: center; width: 120px;">Opciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbodySubacciones"></tbody>
+    </table>
 </div>
 
 <script>
-    /**
-     * Inicialización del módulo al ser cargado por el Router (sidebar.js)
-     */
-    async function inicializarModulo(vistaID) {
+    window.inicializarModulo = async function(vistaID) {
         if (vistaID !== 'subaccion') return;
 
-        // Cargar los datos existentes
-        cargarTablaSubaccion();
-
-        // Configurar el formulario
         const form = document.getElementById('formSubaccion');
-        
-        // Limpiamos listeners previos (Prevención de bugs en SPA)
         const nuevoForm = form.cloneNode(true);
         form.parentNode.replaceChild(nuevoForm, form);
 
+        // Cargamos el selector y la tabla al abrir el módulo
+        await cargarComboAE();
+        cargarTablaSA();
+
         nuevoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnGuardar = document.getElementById('btnGuardarSA');
+            btnGuardar.disabled = true;
 
-            // Validación automática e inteligente
-            const datos = FormManager.validateAndGetData('formSubaccion');
+            const idEdit = document.getElementById('edit_id_sa').value;
+            const datos = {
+                ID_AE: document.getElementById('ID_AE_SELECT').value,
+                NOMBRE_ABREVIADO: document.getElementById('NOMBRE_ABREVIADO').value,
+                SUB_ACCION_ESP: document.getElementById('SUB_ACCION_ESP').value,
+                CONCAT: document.getElementById('CONCAT').value,
+                CODIGO_S_A_E: document.getElementById('CODIGO_S_A_E').value
+            };
             
-            if (datos) {
-                const idEdicion = document.getElementById('ID_SA').value;
-                const metodo = idEdicion ? 'PUT' : 'POST';
-                // Asumimos que la ruta en el backend será /api/subaccion
-                const endpoint = idEdicion ? `/subaccion/${idEdicion}` : '/subaccion';
+            const endpoint = idEdit ? `${Endpoints.SUBACCION}/${idEdit}` : Endpoints.SUBACCION;
+            const metodo = idEdit ? 'PUT' : 'POST';
 
-                // Envío de la petición al servidor
-                const respuesta = await App.peticionAPI(endpoint, metodo, datos);
-                
-                if (respuesta) {
-                    App.mostrarAlerta(idEdicion ? 'Subacción actualizada correctamente' : 'Subacción creada con éxito');
-                    limpiarFormularioSA();
-                    cargarTablaSubaccion(); // Refrescar la vista
-                }
+            const respuesta = await App.peticionAPI(endpoint, metodo, datos);
+
+            if (respuesta) {
+                App.mostrarAlerta(idEdit ? 'Actualizado correctamente' : 'Guardado correctamente', 'success');
+                cancelarEdicionSA();
+                cargarTablaSA();
             }
+
+            btnGuardar.disabled = false;
         });
     }
 
-    /**
-     * Consume la API y renderiza la DataTable profesional
-     */
-    async function cargarTablaSubaccion() {
-        const datos = await App.peticionAPI('/subaccion'); 
+    async function cargarComboAE() {
+        const select = document.getElementById('ID_AE_SELECT');
+        const accionesEspec = await App.peticionAPI(Endpoints.ACCION_ESPECIFICA, 'GET');
         
-        if (datos) {
-            const tabla = new DataTable({
-                containerId: 'contenedorTablaSubaccion',
-                data: datos,
-                columns: [
-                    { key: 'ID_SA', label: 'ID' },
-                    { key: 'SUB_ACCION_ESP', label: 'Descripción de la Subacción' }
-                ],
-                actions: {
-                    idKey: 'ID_SA',
-                    edit: (registro) => {
-                        FormManager.fillForm('formSubaccion', registro);
-                        document.getElementById('btnGuardarSubaccion').innerHTML = '<i class="fas fa-sync"></i> Actualizar Subacción';
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        App.mostrarAlerta('Modifica el texto y presiona Actualizar', 'info');
-                    },
-                    delete: async (id) => {
-                        if (confirm('⚠️ ¿Estás seguro de eliminar esta Subacción permanentemente?')) {
-                            const res = await App.peticionAPI(`/subaccion/${id}`, 'DELETE');
-                            if (res) {
-                                App.mostrarAlerta('Subacción eliminada exitosamente');
-                                cargarTablaSubaccion();
-                            }
-                        }
-                    }
-                }
-            });
-            tabla.render();
+        if (!accionesEspec || accionesEspec.length === 0) {
+            select.innerHTML = '<option value="">⚠️ Registra una Acción Específica primero</option>';
+            return;
         }
+
+        let opciones = '<option value="" disabled selected>-- Selecciona la Acción Específica --</option>';
+        accionesEspec.forEach(ae => {
+            opciones += `<option value="${ae.ID_AE}">[${ae.NOMBRE_ABREVIADO}] - ${ae.ACCION_ESPECIFICA}</option>`;
+        });
+        select.innerHTML = opciones;
     }
 
-    /**
-     * Resetea el formulario y los estados visuales
-     */
-    function limpiarFormularioSA() {
-        FormManager.resetForm('formSubaccion');
-        document.getElementById('ID_SA').value = '';
-        document.getElementById('btnGuardarSubaccion').innerHTML = '<i class="fas fa-save"></i> Guardar Subacción';
+    async function cargarTablaSA() {
+        const tbody = document.getElementById('tbodySubacciones');
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;"><i class="fas fa-sync fa-spin"></i> Cargando...</td></tr>';
+
+        const datos = await App.peticionAPI(Endpoints.SUBACCION, 'GET');
+        
+        if (!datos || datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No hay registros en el catálogo</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = datos.map(d => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding:12px;"><strong>${d.ID_SA}</strong></td>
+                <td style="padding:12px; color: #6f42c1; font-weight: 500;">${d.NOMBRE_AE || 'N/A'}</td>
+                <td style="padding:12px;">${d.NOMBRE_ABREVIADO}</td>
+                <td style="padding:12px;">${d.SUB_ACCION_ESP}</td>
+                <td style="padding:12px; font-size: 0.85rem;">
+                    <strong>Concat:</strong> ${d.CONCAT}<br>
+                    <strong>Cód:</strong> ${d.CODIGO_S_A_E}
+                </td>
+                <td style="padding:12px; text-align:center; display:flex; gap:10px; justify-content:center;">
+                    <button onclick="prepararEdicionSA(${d.ID_SA}, ${d.ID_AE}, '${d.NOMBRE_ABREVIADO}', '${d.SUB_ACCION_ESP}', '${d.CONCAT}', '${d.CODIGO_S_A_E}')" style="background:#ffc107; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarSA(${d.ID_SA})" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.prepararEdicionSA = function(id, id_ae, abrev, subaccion, concat, codigo) {
+        document.getElementById('edit_id_sa').value = id;
+        document.getElementById('ID_AE_SELECT').value = id_ae;
+        document.getElementById('NOMBRE_ABREVIADO').value = abrev;
+        document.getElementById('SUB_ACCION_ESP').value = subaccion;
+        document.getElementById('CONCAT').value = concat;
+        document.getElementById('CODIGO_S_A_E').value = codigo;
+        
+        document.getElementById('form-title-sa').innerText = 'Editando Subacción';
+        document.getElementById('btn-text-sa').innerText = 'Actualizar Datos';
+        document.getElementById('btnCancelarEditSA').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.cancelarEdicionSA = function() {
+        document.getElementById('edit_id_sa').value = '';
+        document.getElementById('formSubaccion').reset();
+        document.getElementById('form-title-sa').innerText = 'Nueva Subacción';
+        document.getElementById('btn-text-sa').innerText = 'Guardar Registro';
+        document.getElementById('btnCancelarEditSA').style.display = 'none';
+    }
+
+    window.eliminarSA = async function(id) {
+        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+        
+        const respuesta = await App.peticionAPI(`${Endpoints.SUBACCION}/${id}`, 'DELETE');
+        if (respuesta) {
+            App.mostrarAlerta('Eliminado con éxito', 'success');
+            cargarTablaSA();
+        }
     }
 </script>

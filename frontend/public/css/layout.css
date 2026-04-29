@@ -1,132 +1,172 @@
-/* ==========================================================================
-   1. CONTENEDOR PRINCIPAL (Layout Base)
-   ========================================================================== */
+/* =========================================
+   SISTEMA SAE - ESTRUCTURA Y ALINEACIÓN (CORREGIDO)
+   Archivo: layout.css
+   ========================================= */
+
+/* --- 0. CONTENEDOR MAESTRO --- */
+/* Esto soluciona que la pantalla se corte a la mitad */
 .app-container {
     display: flex;
-    height: 100vh;           /* Altura total de la pantalla */
-    width: 100vw;            /* Ancho total */
-    overflow: hidden;        /* Evita scroll doble */
-    background-color: var(--bg-main, #f4f7f6);
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--content-bg);
 }
 
-/* ==========================================================================
-   2. BARRA LATERAL (Sidebar)
-   ========================================================================== */
+/* --- 1. SIDEBAR --- */
 .sidebar {
     width: 260px;
-    background-color: var(--bg-sidebar, #1a202c);
-    color: var(--text-light, #ffffff);
+    background-color: var(--primary-bg);
+    color: var(--text-sidebar);
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;          /* Evita que el menú se encoja */
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
     z-index: 100;
-    transition: var(--transition-base, all 0.3s ease);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
 
 .sidebar-header {
-    padding: 20px;
+    padding: var(--spacing-lg) var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: var(--spacing-md);
+    color: white;
+}
+
+.sidebar-menu {
+    list-style: none;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* AQUÍ SE ARREGLA LA SEPARACIÓN DE LOS ICONOS DEL MENÚ */
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* <- Separación exacta entre icono y texto */
+    padding: 12px 20px;
+    color: var(--text-sidebar);
+    text-decoration: none;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-left: 4px solid transparent;
+}
+
+.menu-icon {
+    width: 20px; /* Tamaño uniforme para que los textos queden alineados */
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    height: 70px;
+    font-size: 1.1rem;
+}
+
+.menu-item:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.menu-item.active {
+    background-color: rgba(0, 86, 179, 0.15); 
+    color: white;
+    border-left-color: var(--accent-active);
+    font-weight: 600;
+}
+
+.menu-header {
+    padding: 20px 20px 8px 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+}
+
+/* --- 2. CONTENIDO PRINCIPAL Y HEADER --- */
+/* Esto asegura que ocupe todo el ancho derecho */
+.main-content {
+    flex: 1;
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* LA CABECERA (Totalmente alineada) */
+.app-header {
+    background-color: var(--header-bg);
+    height: 65px; 
+    width: 100%;
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 0 25px;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.header-left {
+    display: flex;
+    align-items: center; 
+    gap: 20px; 
+}
+
+.hamburger-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dark);
+    font-size: 1.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.sidebar-menu {
-    flex: 1;
-    overflow-y: auto;        /* Scroll interno si el menú es largo */
-    padding: 10px 0;
+.header-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
 }
 
-.menu-item {
+/* Panel de Usuario Derecho */
+.header-right {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
-    color: #bdc3c7;
-    font-size: 0.9rem;
-    font-weight: 500;
-    border-left: 4px solid transparent;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    gap: 15px;
 }
 
-.menu-item i {
-    width: 30px;
-    font-size: 1.1rem;
-}
-
-.menu-item:hover, 
-.menu-item.active {
-    background-color: var(--bg-sidebar-hover, #2d3748);
-    color: white;
-    border-left-color: var(--color-primary, #0056b3);
-}
-
-/* ==========================================================================
-   3. CONTENIDO PRINCIPAL (Donde sucede la magia)
-   ========================================================================== */
-.main-content {
-    flex: 1;                /* Ocupa todo el ancho restante */
+.user-info {
+    text-align: right;
     display: flex;
     flex-direction: column;
-    overflow: hidden;       /* Mantiene el header fijo arriba */
 }
 
-/* Header Superior */
-.top-header {
-    height: 70px;
-    background-color: var(--bg-card, #ffffff);
-    padding: 0 25px;
+.user-name-wrapper {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    z-index: 10;
+    align-items: baseline;
+    gap: 5px;
 }
 
-/* EL ÁREA DINÁMICA (ID Corregido) */
+.user-db { font-weight: 800; color: var(--text-dark); }
+.user-title { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Para que la imagen de ui-avatars se vea redonda y perfecta */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Área donde cargan tus ventanas */
 #content-area {
-    flex: 1;
-    overflow-y: auto;       /* El scroll de los formularios vive aquí */
     padding: 25px;
-    scroll-behavior: smooth;
-}
-
-/* ==========================================================================
-   4. COMPONENTES (Cards y Animaciones)
-   ========================================================================== */
-.card {
-    background-color: var(--bg-card, #ffffff);
-    border-radius: 8px;
-    padding: 25px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-    margin-bottom: 25px;
-    animation: fadeIn 0.4s ease-out;
-}
-
-.card h2 {
-    color: var(--color-primary, #0056b3);
-    margin-bottom: 20px;
-    font-size: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ==========================================================================
-   5. RESPONSIVO (Móvil)
-   ========================================================================== */
-@media screen and (max-width: 768px) {
-    .app-container { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; position: static; }
-    .sidebar-menu { display: flex; overflow-x: auto; }
-    .menu-item { flex-shrink: 0; border-left: none; border-bottom: 3px solid transparent; }
-    .menu-item.active { border-bottom-color: var(--color-primary); }
+    flex-grow: 1;
 }
