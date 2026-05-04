@@ -23,7 +23,8 @@ const subaccionRoutes = require('./routes/subaccion.routes');
 const actividadRoutes = require('./routes/actividad.routes');
 // 👉 ¡AQUÍ ESTÁ LA LÍNEA QUE FALTABA!
 const registroRoutes = require('./routes/registro.routes');
-
+// BUSCA TUS IMPORTACIONES (Sección 3) Y AÑADE:
+const authRoutes = require('./routes/auth.routes');
 
 // 4. Endpoints (Conexión de rutas)
 app.use('/api/accion', accionRoutes);
@@ -34,6 +35,8 @@ app.use('/api/subaccion', subaccionRoutes);
 app.use('/api/actividad', actividadRoutes);
 // 👉 ¡Y AQUÍ ESTÁ LA SEGUNDA LÍNEA QUE FALTABA!
 app.use('/api/detalle_registro', registroRoutes);
+// BUSCA TUS APP.USE (Sección 4) Y AÑADE:
+app.use('/api/auth', authRoutes);
 
 
 // 5. Raíz
